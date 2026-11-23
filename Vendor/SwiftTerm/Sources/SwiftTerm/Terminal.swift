@@ -2248,7 +2248,8 @@ open class Terminal {
             let scrollBackSize = buffer.lines.count - rows
             if scrollBackSize > 0 {
                 buffer.lines.trimStart (count: scrollBackSize)
-                buffer.linesTop = 0
+                // Retained rows keep their stable scrollback indices.
+                buffer.linesTop += scrollBackSize
                 buffer.yBase = max (buffer.yBase - scrollBackSize, 0)
                 buffer.yDisp = max (buffer.yDisp - scrollBackSize, 0)
             }

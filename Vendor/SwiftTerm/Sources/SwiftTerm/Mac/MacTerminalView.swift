@@ -505,7 +505,7 @@ open class TerminalView: NSView, NSTextInputClient, NSUserInterfaceValidations, 
     }
     
     open func linefeed(source: Terminal) {
-        selection.selectNone()
+        // Selection ranges are adjusted after the complete output chunk is parsed.
     }
     
     /// This vaiable controls whether mouse events are sent to the application running under the
@@ -1110,6 +1110,16 @@ open class TerminalView: NSView, NSTextInputClient, NSUserInterfaceValidations, 
     }
     
     private var selectionDragAnchor: Position?
+
+    func adjustSelectionDragAnchor(rowOffset: Int, bufferChanged: Bool) {
+        guard let anchor = selectionDragAnchor else { return }
+        let row = anchor.row+rowOffset
+        guard !bufferChanged, row >= 0, row < terminal.displayBuffer.lines.count else {
+            selectionDragAnchor = nil
+            return
+        }
+        selectionDragAnchor = Position(col: anchor.col, row: row)
+    }
     private var commandLinkGesture = false
     private var pressedLink: String?
     private var commandLinkStart = NSPoint.zero

@@ -1666,15 +1666,21 @@ extension TerminalView {
         scrollTo (row: newPosition)
     }
       
-    func feedPrepare()
+    func feedPrepare() -> SelectionService.OutputState
     {
+        let state = selection.captureOutputState()
         search.invalidate()
-        selection.active = false
         startDisplayUpdates()
+        return state
     }
     
-    func feedFinish ()
+    func feedFinish (_ state: SelectionService.OutputState)
     {
+        selection.restoreOutputState(state)
+        #if os(macOS)
+        adjustSelectionDragAnchor(rowOffset: state.linesTop-terminal.displayBuffer.linesTop,
+                                  bufferChanged: state.buffer !== selection.outputSelectionBuffer)
+        #endif
         suspendDisplayUpdates ()
         queuePendingDisplay()
     }
@@ -1682,17 +1688,17 @@ extension TerminalView {
     /// Sends data to the terminal emulator for interpretation, this can be invoked from a background thread
     public func feed (byteArray: ArraySlice<UInt8>)
     {
-        feedPrepare()
+        let state = feedPrepare()
         terminal.feed (buffer: byteArray)
-        feedFinish()
+        feedFinish(state)
     }
     
     /// Sends data to the terminal emulator for interpretation, this can be invoked from a background thread
     public func feed (text: String)
     {
-        feedPrepare()
+        let state = feedPrepare()
         terminal.feed (text: text)
-        feedFinish()
+        feedFinish(state)
     }
          
     /**

@@ -626,3 +626,43 @@ extension SelectionService {
         setActiveAndNotify()
     }
 }
+
+extension SelectionService {
+    struct OutputState {
+        let buffer: Buffer
+        let linesTop: Int
+    }
+
+    var outputSelectionBuffer: Buffer {
+        terminal.isDisplayBufferAlternate ? terminal.altBuffer : terminal.normalBuffer
+    }
+
+    func captureOutputState() -> OutputState {
+        // A synchronized-output snapshot belongs to the same logical screen.
+        OutputState(buffer: outputSelectionBuffer, linesTop: terminal.displayBuffer.linesTop)
+    }
+
+    /// Selection is a live buffer range. Output can edit its cells, but only
+    /// scrollback eviction moves its indices or removes part of the range.
+    func restoreOutputState(_ state: OutputState) {
+        guard active else { return }
+        let buffer = terminal.displayBuffer
+        guard outputSelectionBuffer === state.buffer, buffer.lines.count > 0 else { selectNone(); return }
+        let offset = state.linesTop-buffer.linesTop
+        let a = Position(col: start.col, row: start.row+offset)
+        let b = Position(col: end.col, row: end.row+offset)
+        let (first, last) = Position.compare(a,b) == .before ? (a,b) : (b,a)
+        guard last.row >= 0, first.row < buffer.lines.count else { selectNone(); return }
+        func retained(_ position: Position) -> Position {
+            if position.row < 0 { return Position(col: 0, row: 0) }
+            if position.row >= buffer.lines.count { return Position(col: terminal.cols, row: buffer.lines.count-1) }
+            return Position(col: min(terminal.cols,max(0,position.col)), row: position.row)
+        }
+        let newStart = retained(a), newEnd = retained(b)
+        if hasSelectionRange && newStart == newEnd { selectNone(); return }
+        guard newStart != start || newEnd != end else { return }
+        start = newStart; end = newEnd
+        if let pivot { self.pivot = retained(Position(col: pivot.col, row: pivot.row+offset)) }
+        setActiveAndNotify()
+    }
+}
