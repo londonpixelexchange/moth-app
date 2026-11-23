@@ -60,13 +60,22 @@ final class AboutWindowController: NSWindowController {
         separator(); heading("Thanks")
         thanksText.font = .systemFont(ofSize:13); thanksText.alignment = .center; thanksText.maximumNumberOfLines = 0; stack.addArrangedSubview(thanksText)
         separator(); heading("Credits")
+        func creditLink(_ index: Int, prominent: Bool = false) -> NSButton {
+            let link = NSButton(title:projects[index].0,target:self,action:#selector(openProject(_:)))
+            link.tag = index; link.isBordered = false
+            link.font = .systemFont(ofSize:prominent ? 13 : 12,weight:prominent ? .semibold : .regular)
+            styleLink(link)
+            return link
+        }
+        let wumpus = creditLink(0, prominent: true)
+        stack.addArrangedSubview(wumpus); stack.setCustomSpacing(10,after:wumpus)
         let credits = NSStackView(); credits.orientation = .vertical; credits.alignment = .leading; credits.spacing = 4
         stack.addArrangedSubview(credits); credits.widthAnchor.constraint(equalTo:stack.widthAnchor).isActive = true
-        for start in stride(from:0,to:projects.count,by:2) {
+        for start in stride(from:1,to:projects.count,by:2) {
             let row = NSStackView(); row.distribution = .fillEqually; row.spacing = 12
             credits.addArrangedSubview(row); row.widthAnchor.constraint(equalTo:credits.widthAnchor).isActive = true
             for index in start..<min(start+2,projects.count) {
-                let link = NSButton(title:projects[index].0,target:self,action:#selector(openProject(_:))); link.tag = index; link.isBordered = false; link.font = .systemFont(ofSize:12); styleLink(link); row.addArrangedSubview(link)
+                row.addArrangedSubview(creditLink(index))
             }
         }
         let notices = NSButton(title:"Licences…",target:self,action:#selector(showLicences(_:))); notices.bezelStyle = .inline; notices.font = .systemFont(ofSize:11); styleLink(notices); stack.addArrangedSubview(notices)
