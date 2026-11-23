@@ -101,7 +101,7 @@
 			buildSettings = {
 				ONLY_ACTIVE_ARCH = "NO";
 				INFOPLIST_KEY_NSHighResolutionCapable = "YES";
-                INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright (c) 2026 Thomas Edward Vaughan, trading as London Pixel Exchange. Source-available.";
+                INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright (c) 2026 T E Vaughan. Source-available.";
 				MARKETING_VERSION = "0.27.3";
 				CODE_SIGN_IDENTITY = "-";
 				ENABLE_APP_SANDBOX = "NO";
@@ -217,7 +217,7 @@
 			buildSettings = {
 				ONLY_ACTIVE_ARCH = "YES";
 				INFOPLIST_KEY_NSHighResolutionCapable = "YES";
-                INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright (c) 2026 Thomas Edward Vaughan, trading as London Pixel Exchange. Source-available.";
+                INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright (c) 2026 T E Vaughan. Source-available.";
 				MARKETING_VERSION = "0.27.3";
 				CODE_SIGN_IDENTITY = "-";
 				ENABLE_APP_SANDBOX = "NO";
