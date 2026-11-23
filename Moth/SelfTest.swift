@@ -962,7 +962,8 @@ enum SelfTest {
         checks["allThreeFontFamiliesBundledAndRegistered"] = Configuration.bundledFonts.allSatisfy { NSFont(name:$0.1,size:14) != nil } && Bundle.main.url(forResource:"WumpusMonoPro-Regular",withExtension:"ttf",subdirectory:"Fonts") != nil
         checks["wumpusIsDefaultFont"] = Configuration().fontName == "WumpusMonoPro-Regular"
         let notices = Bundle.main.url(forResource:"THIRD-PARTY-NOTICES",withExtension:nil).flatMap { try? String(contentsOf:$0) } ?? ""
-        checks["fontEmbeddingLicenceAndIBMLicenceBundled"] = notices.contains("non-exclusive licence") && notices.contains("IBM Plex Mono 2.5.0") && notices.contains("SIL OPEN FONT LICENSE")
+        let fontPermission = Bundle.main.url(forResource:"FONT-PERMISSION",withExtension:nil).flatMap { try? String(contentsOf:$0) } ?? ""
+        checks["fontEmbeddingLicenceAndIBMLicenceBundled"] = fontPermission.contains("worldwide, non-exclusive, royalty-free permission") && notices.contains("IBM Plex Mono 2.5.0") && notices.contains("SIL OPEN FONT LICENSE")
         var hash: UInt64 = 14695981039346656037
         for x in KeyboardSoundPlayer.samples(style:"tink",midi:60) { for shift in stride(from:0,to:32,by:8) { hash = (hash ^ UInt64((x.bitPattern >> shift)&255)) &* 1099511628211 } }
         checks["tinkWaveformRemainsUnchanged"] = hash == 0x16acb3c7afaaa9fc
@@ -1961,6 +1962,9 @@ enum SelfTest {
         waitFor({ outputContains("MOTH_SCREEN_READY") }, timeout: 1.4) { started in
             suite.results["gnuScreenStartsAtPaneSize"] = started && hasOriginalSize() &&
                 outputContains("MOTH_SCREEN_IN=\(rows) \(cols)")
+            if suite.results["gnuScreenStartsAtPaneSize"] != true {
+                print("GNU Screen start diagnostic:", "expected", dimensions, "actual", terminal.cols, terminal.rows, "label", pane.dimensions.stringValue, "valid", validSize, "output", terminal.exportPlainText())
+            }
             guard started else { return }
             view.send(txt: "stop\r")
             waitFor({ outputContains("MOTH_SCREEN_OUT=\(rows) \(cols)") }, timeout: 1.4) { restored in
