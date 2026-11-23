@@ -47,6 +47,29 @@ final class SelectionTests: TerminalDelegate {
         #expect(selection.getSelectedText() == "hello")
     }
 
+    @Test(arguments: ["1.2.3.4", "192.168.100.200", "host.example.org", "file_name-v2.txt"])
+    func doubleClickSelectsWholeTokenAtEveryCharacter(token: String) {
+        let terminal = Terminal(delegate: self, options: TerminalOptions(cols: 80, rows: 2))
+        let selection = SelectionService(terminal: terminal)
+        let prefix = "before "
+        terminal.feed(text: prefix+token+" after")
+        for column in prefix.count..<(prefix.count+token.count) {
+            selection.selectWordOrExpression(at: Position(col: column,row: 0),in: terminal.buffer)
+            #expect(selection.getSelectedText() == token, "Clicked column \(column)")
+            #expect(selection.start.col == prefix.count)
+            #expect(selection.end.col == prefix.count+token.count)
+        }
+    }
+
+    @Test func wordDragExtendsThroughAnAddressSeparator() {
+        let terminal = Terminal(delegate: self, options: TerminalOptions(cols: 30, rows: 2))
+        let selection = SelectionService(terminal: terminal)
+        terminal.feed(text: "1.2.3.4 5.6.7.8")
+        selection.selectWordOrExpression(at: Position(col: 0,row: 0),in: terminal.buffer)
+        selection.dragExtend(bufferPosition: Position(col: 9,row: 0))
+        #expect(selection.getSelectedText() == "1.2.3.4 5.6.7.8")
+    }
+
     @Test func testSelectWordOrExpressionSelectsBalancedParens() {
         let terminal = Terminal(delegate: self, options: TerminalOptions(cols: 20, rows: 1))
         let selection = SelectionService(terminal: terminal)

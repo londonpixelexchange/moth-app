@@ -434,6 +434,10 @@ class SelectionService: CustomDebugStringConvertible {
         end = position
     }
 
+    private func isWordCharacter(_ ch: Character) -> Bool {
+        ch.isLetter || ch.isNumber || ch == "." || ch == "_" || ch == "-"
+    }
+
     let nullChar = Character(UnicodeScalar(0))
     
     /**
@@ -448,8 +452,8 @@ class SelectionService: CustomDebugStringConvertible {
             includeFunc = { ch in ch == Character(UnicodeScalar(0)) }
         case " ":
             includeFunc = { ch in ch == " " }
-        case let ch where ch.isLetter || ch.isNumber:
-            includeFunc = { ch in ch.isLetter || ch.isNumber || ch == "." || ch == "_" || ch == "-" }
+        case let ch where isWordCharacter(ch):
+            includeFunc = isWordCharacter
         default:
             return position
         }
@@ -498,8 +502,8 @@ class SelectionService: CustomDebugStringConvertible {
         case " ":
             // Select all white space
             simpleScanSelection (from: position, in: buffer) { ch in ch == " " }
-        case let ch where ch.isLetter || ch.isNumber:
-            simpleScanSelection (from: position, in: buffer) { ch in ch.isLetter || ch.isNumber || ch == "." || ch == "_" || ch == "-" }
+        case let ch where isWordCharacter(ch):
+            simpleScanSelection(from: position, in: buffer, includeFunc: isWordCharacter)
         case "{":
             fallthrough
         case "(":
