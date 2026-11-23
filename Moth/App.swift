@@ -366,8 +366,6 @@ final class App: NSObject, NSApplicationDelegate, NSMenuItemValidation {
         let help = menu("Help")
         item(help, "Documentation", #selector(showDocumentation(_:)))
         item(help, "What’s New?", #selector(showReleaseNotes(_:)))
-        help.addItem(.separator())
-        item(help, "Run Graphics & Glyph Showcase", #selector(demo(_:)))
         NSApp.mainMenu = main
     }
 }
