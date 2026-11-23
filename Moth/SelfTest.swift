@@ -193,6 +193,7 @@ enum SelfTest {
         }
         let tmuxScroll = startTmuxScrollCheck()
         let fullScreenChecks = startFullScreenChecks()
+        let screenChecks = startGNUScreenChecks()
         let liveMonitor = startMonitorCheck()
         let htopMonitor = startMonitorCheck(program: "htop")
         let cleanEnvironment = ShellEnvironment.session(inherited: ["NO_COLOR": "1", "TERM": "dumb", "COLORTERM": "", "PATH": "/test/path"])
@@ -260,6 +261,7 @@ enum SelfTest {
                 monitor.1.stop(); monitor.0.orderOut(nil)
             }
             checks.merge(fullScreenChecks.results) { _, new in new }; fullScreenChecks.stop()
+            checks.merge(screenChecks.results) { _, new in new }; screenChecks.stop()
             if let tmuxScroll { checks.merge(tmuxScroll.results) { _, new in new }; tmuxScroll.stop() }
             let output = ProcessInfo.processInfo.environment["MOTH_TEST_RESULT"] ?? "/tmp/moth-test-results.json"
             app.config = Configuration(); try! Configuration.save(app.config); app.applyAppearance()
@@ -1928,6 +1930,47 @@ enum SelfTest {
         var panes: [Pane] = []
         func stop() { panes.forEach { $0.stop() } }
     }
+    static func startGNUScreenChecks() -> FullScreenChecks {
+        let suite = FullScreenChecks()
+        let pane = Pane(config: Configuration(), start: false)
+        suite.panes = [pane]
+        let view = pane.terminal
+        let terminal = view.getTerminal()
+        let environment = ShellEnvironment.session(inherited: [
+            "HOME": NSHomeDirectory(),
+            "PATH": "/usr/bin:/bin"
+        ]).map { "\($0.key)=\($0.value)" }
+        let command = """
+        read -r start
+        /usr/bin/screen -c /dev/null -q /bin/sh -c 'printf "MOTH_SCREEN_IN="; stty size; echo MOTH_SCREEN_READY; read -r stop'
+        printf 'MOTH_SCREEN_OUT='; stty size
+        read -r finish
+        """
+        view.startProcess(executable: "/bin/sh", args: ["-c", command], environment: environment)
+        view.setFrameSize(NSSize(width: 1000, height: 550))
+        let cols = terminal.cols, rows = terminal.rows
+        let dimensions = "\(cols) × \(rows)"
+        let validSize = cols != 80 && cols != 132 && pane.dimensions.stringValue == dimensions
+        suite.results["gnuScreenStartsAtPaneSize"] = false
+        suite.results["gnuScreenExitPreservesPaneAndPTYSize"] = false
+        func outputContains(_ text: String) -> Bool { terminal.exportPlainText().contains(text) }
+        func hasOriginalSize() -> Bool {
+            validSize && terminal.cols == cols && terminal.rows == rows && pane.dimensions.stringValue == dimensions
+        }
+        view.send(txt: "start\r")
+        waitFor({ outputContains("MOTH_SCREEN_READY") }, timeout: 1.4) { started in
+            suite.results["gnuScreenStartsAtPaneSize"] = started && hasOriginalSize() &&
+                outputContains("MOTH_SCREEN_IN=\(rows) \(cols)")
+            guard started else { return }
+            view.send(txt: "stop\r")
+            waitFor({ outputContains("MOTH_SCREEN_OUT=\(rows) \(cols)") }, timeout: 1.4) { restored in
+                suite.results["gnuScreenExitPreservesPaneAndPTYSize"] = restored && hasOriginalSize()
+                view.send(txt: "finish\r")
+            }
+        }
+        return suite
+    }
+
     static func startFullScreenChecks() -> FullScreenChecks {
         let suite = FullScreenChecks()
         let folder = Configuration.url.deletingLastPathComponent()

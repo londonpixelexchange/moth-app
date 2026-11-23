@@ -422,6 +422,9 @@ open class Terminal {
     var gLevel: UInt8 = 0
     var cursorBlink: Bool = false
     
+    /// Whether applications may change the grid width with DECCOLM (DEC private mode 3).
+    /// Disable this when the host view owns the grid dimensions.
+    public var allowsApplicationColumnModeChanges = true
     var allow80To132 = true
     
     public var parser: EscapeSequenceParser
@@ -3079,7 +3082,7 @@ open class Terminal {
             case 2: // DECCKM - reserved for VT52 emulation
                 res = modeSet
             case 3: // DECCOLM - 132 Column Mode
-                res = buffer.cols == 132 ? modeSet : modeReset
+                res = allowsApplicationColumnModeChanges ? (buffer.cols == 132 ? modeSet : modeReset) : modeAlwaysReset
             case 4: // DECSCLM - Smooth/jump scroll, we dont implement
                 res = smoothScroll ? modeSet : modeReset
             case 5: // DECSCNM - Reverse Display Colors
@@ -3109,7 +3112,7 @@ open class Terminal {
             case 30: // RXVT show scrollbar
                 res = modeCouldBeImplementedButReset
             case 40: // Enable 80 to 132 transition
-                res = allow80To132 ? modeSet : modeReset
+                res = allowsApplicationColumnModeChanges ? (allow80To132 ? modeSet : modeReset) : modeAlwaysReset
             case 41: // xterm tab workaround in "more(1)" command
                 res = modeReset
             case 42: // DECNRCM - national character set
@@ -3848,7 +3851,7 @@ open class Terminal {
             case 1:
                 applicationCursor = false
             case 3:
-                if allow80To132 {
+                if allowsApplicationColumnModeChanges && allow80To132 {
                     // DECCOLM
                     resize (cols: 80, rows: rows)
                     tdel?.sizeChanged(source: self)
@@ -4080,7 +4083,7 @@ open class Terminal {
                 // set VT100 mode here
                 
             case 3: // DECCOLM - go to 132 col mode
-                if allow80To132 {
+                if allowsApplicationColumnModeChanges && allow80To132 {
                     resize (cols: 132, rows: rows)
                     resetToInitialState()
                     tdel?.sizeChanged(source: self)

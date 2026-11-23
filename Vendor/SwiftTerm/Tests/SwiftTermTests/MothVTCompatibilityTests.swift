@@ -8,6 +8,24 @@ final class MothVTCompatibilityTests: TerminalDelegate {
     var responses = ""
     func send(source: Terminal, data: ArraySlice<UInt8>) { responses += String(decoding:data,as:UTF8.self) }
     func terminal() -> Terminal { Terminal(delegate:self,options:TerminalOptions(cols:20,rows:6,scrollback:30)) }
+    @Test func hostOwnsGridSizeWhenApplicationColumnModesAreDisabled() {
+        let t = Terminal(delegate: self, options: TerminalOptions(cols: 120, rows: 31))
+        t.allowsApplicationColumnModeChanges = false
+        t.feed(text: "\u{1b}[!p\u{1b}[?3;4l")
+        #expect(t.cols == 120 && t.rows == 31)
+
+        t.feed(text: "\u{1b}c\u{1b}[?40h\u{1b}[?3h")
+        #expect(t.cols == 120 && t.rows == 31)
+        t.feed(text: "\u{1b}[?3$p\u{1b}[?40$p")
+        #expect(responses.hasSuffix("\u{1b}[?3;4$y\u{1b}[?40;4$y"))
+
+        t.resize(cols: 132, rows: 32)
+        t.feed(text: "\u{1b}[?3l")
+        #expect(t.cols == 132 && t.rows == 32)
+        t.allowsApplicationColumnModeChanges = true
+        t.feed(text: "\u{1b}[?3l")
+        #expect(t.cols == 80 && t.rows == 32)
+    }
     @Test func doubleLineSequencesAndSingleWidthRestore() {
         let t=terminal()
         for (sequence,mode) in [("6",BufferLine.RenderLineMode.doubleWidth),("3",.doubledTop),("4",.doubledDown),("5",.single)] {

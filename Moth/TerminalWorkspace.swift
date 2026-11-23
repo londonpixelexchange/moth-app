@@ -92,12 +92,14 @@ class ShellView: LocalProcessTerminalView {
     }
     override init(frame: CGRect) {
         super.init(frame: frame)
+        getTerminal().allowsApplicationColumnModeChanges = false
         fontVariantResolver = FontTypography.styledFont
         wantsLayer = true
         registerForDraggedTypes([.fileURL,.mothTab,.mothPane])
     }
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+        getTerminal().allowsApplicationColumnModeChanges = false
         fontVariantResolver = FontTypography.styledFont
         wantsLayer = true
         registerForDraggedTypes([.fileURL,.mothTab,.mothPane])
