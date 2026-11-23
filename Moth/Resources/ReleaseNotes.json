@@ -2,7 +2,7 @@
   {
     "version": "0.27.6",
     "build": 66,
-    "status": "unreleased",
+    "status": "released",
     "sections": [
       {
         "title": "Fixed",
