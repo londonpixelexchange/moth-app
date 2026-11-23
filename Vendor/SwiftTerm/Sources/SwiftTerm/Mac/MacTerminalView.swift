@@ -1247,12 +1247,8 @@ open class TerminalView: NSView, NSTextInputClient, NSUserInterfaceValidations, 
     
     func tryUrlFont () -> NSFont
     {
-        for x in ["Optima", "Helvetica", "Helvetica Neue"] {
-            if let font = NSFont (name: x, size: 12) {
-                return font
-            }
-        }
-        return NSFont.systemFont(ofSize: 12)
+        NSFont(name: "WumpusMonoPro-Italic", size: 11)
+            ?? NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
     }
     
     // The payload contains the terminal data which is expected to be of the form
