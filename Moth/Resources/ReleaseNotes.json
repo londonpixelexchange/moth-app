@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.27.6",
+    "build": 66,
+    "status": "unreleased",
+    "sections": [
+      {
+        "title": "Fixed",
+        "items": [
+          "Pasting multiple lines preserves line breaks in terminal programs.",
+          "Copying long lines after scrollback has accumulated no longer inserts newlines where text wraps at the window edge. Original line breaks are preserved."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.5",
     "build": 65,
     "status": "released",

@@ -904,7 +904,12 @@ open class TerminalView: NSView, NSTextInputClient, NSUserInterfaceValidations, 
             if isPaste, terminal.bracketedPasteMode {
                 send(data: EscapeSequences.bracketedPasteStart[0...])
             }
-            send (txt: str as String)
+            // Pasted line endings must use the same CR byte as the Return key.
+            // Raw-mode programs may ignore LF; collapse CRLF before converting LF.
+            let text = isPaste
+                ? (str as String).replacingOccurrences(of: "\r\n", with: "\r").replacingOccurrences(of: "\n", with: "\r")
+                : str as String
+            send (txt: text)
             if isPaste, terminal.bracketedPasteMode {
                 send(data: EscapeSequences.bracketedPasteEnd[0...])
             }

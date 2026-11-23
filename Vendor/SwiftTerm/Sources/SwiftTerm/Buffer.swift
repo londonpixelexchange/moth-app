@@ -1198,7 +1198,7 @@ public final class Buffer {
                     // The line already exists (eg. the initial viewport), mark it as a
                     // wrapped line
                     _y += 1
-                    _lines [y].isWrapped = true
+                    _lines [_y + _yBase].isWrapped = true
                 }
                 // row changed, get it again
             } else {

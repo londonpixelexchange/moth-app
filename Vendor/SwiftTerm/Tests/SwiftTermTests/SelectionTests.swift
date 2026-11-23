@@ -15,6 +15,26 @@ final class SelectionTests: TerminalDelegate {
         print ("here")
     }
     
+    @Test(arguments: [false, true])
+    func copyingWrappedTextAfterScrollbackPreservesLogicalLines(reversed: Bool) {
+        let terminal = Terminal(delegate: self, options: TerminalOptions(cols: 20, rows: 8))
+        terminal.feed(text: String(repeating: "history\r\n", count: 30))
+        let base = terminal.buffer.yBase
+        #expect(base > 0)
+        let historyWraps = (0..<base).map { terminal.buffer.lines[$0].isWrapped }
+        let text = "This is one long line that wraps across several terminal rows."
+        // Redrawing above the bottom row exercises wrapping into existing screen rows.
+        terminal.feed(text: "\u{1b}[1;1H\u{1b}[J"+text+"\r\nnext line")
+        let cursor = terminal.getCursorLocation()
+        let start = Position(col: 0, row: base)
+        let end = Position(col: cursor.x, row: base+cursor.y)
+        let selection = SelectionService(terminal: terminal)
+        selection.setSoftStart(bufferPosition: reversed ? end : start)
+        selection.dragExtend(bufferPosition: reversed ? start : end)
+        #expect(selection.getSelectedText() == text+"\nnext line")
+        #expect((0..<base).map { terminal.buffer.lines[$0].isWrapped } == historyWraps)
+    }
+
     @Test func testDoesNotCrashWhenSelectingWordOrExpressionOutsideColumnRange() {
         let terminal = Terminal(delegate: self, options: TerminalOptions (cols: 10, rows: 10))
         let selection = SelectionService(terminal: terminal)
