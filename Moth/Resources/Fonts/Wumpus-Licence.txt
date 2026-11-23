@@ -1,0 +1,4 @@
+Wumpus Mono Pro
+
+See FONT-PERMISSION for the redistribution and modification terms that
+apply to the font files supplied with Moth.

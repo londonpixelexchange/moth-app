@@ -1,0 +1,91 @@
+[
+  {
+    "version": "0.27.3",
+    "build": 63,
+    "status": "unreleased",
+    "sections": [
+      {
+        "title": "Acknowledgements",
+        "items": [
+          "Added Malte Ostendorff to Thanks."
+        ]
+      },
+      {
+        "title": "Fixes",
+        "items": [
+          "URLs spanning full-width terminal rows are recognised and underlined as one link, including when hovering over a continuation row."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.27.2",
+    "build": 62,
+    "status": "released",
+    "sections": [
+      {
+        "title": "Added",
+        "items": [
+          "Up to nine split panes per tab.",
+          "Maximise the active pane with Command+Shift+Return, then restore the original split layout.",
+          "Read release notes from Help → What’s New?.",
+          "Open the online documentation from the Help menu."
+        ]
+      },
+      {
+        "title": "Improved",
+        "items": [
+          "The dark app icon is now the default.",
+          "Animated backgrounds pause when windows are fully covered or hidden, or the desktop is inactive.",
+          "Animated backgrounds present directly through Metal, reducing CPU use while keeping the same colours and motion.",
+          "Build identifiers show the source commit."
+        ]
+      },
+      {
+        "title": "Fixed",
+        "items": [
+          "Option-key typing uses the macOS keyboard layout by default, including # and € on British keyboards. Option as Meta remains available in Settings.",
+          "Option+Left and Option+Right move between shell words with native Option typing enabled.",
+          "Recovered sessions stay hidden behind a restoration indicator until ready, then restore keyboard focus without interrupting search input.",
+          "New windows receive keyboard focus immediately and accept typing while the shell starts."
+        ]
+      }
+    ],
+    "commit": "f3cdc4e3f2c9"
+  },
+  {
+    "version": "0.27.1",
+    "build": 61,
+    "status": "released",
+    "commit": "ccf97ba79476",
+    "sections": [
+      {
+        "title": "Withdrawn",
+        "items": [
+          "Replaced by Moth 0.27.2."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.27.0",
+    "build": 60,
+    "status": "released",
+    "sections": [
+      {
+        "title": "First public release",
+        "items": [
+          "Native macOS windows with tabs, split panes, and saved window layouts.",
+          "Named profiles for appearance and session defaults, with live-reloading TOML configuration.",
+          "Snippet and recorded macros, configurable shortcuts, and regular-expression search.",
+          "Sixel images, 24-bit truecolor, Nerd Fonts icons, and configurable VT double-width and double-height lines.",
+          "Wumpus Mono Pro with bold and italic styles, plus font and OpenType controls.",
+          "Configurable themes, ANSI palettes, cursors, background images, animated backgrounds, opacity, and frosted glass.",
+          "Local session recovery after an app crash, tab and pane transfers between windows, and URL opening.",
+          "Configurable bells and keyboard sounds, text encodings, scrollback export, printing, and update checks.",
+          "Signed and notarised for Apple silicon Macs running macOS 13 or later."
+        ]
+      }
+    ]
+  }
+]

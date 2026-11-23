@@ -1,0 +1,443 @@
+// !$*UTF8*$!
+{
+	classes = {
+	};
+	objectVersion = "56";
+	archiveVersion = "1";
+	objects = {
+        A02900000000000000000001 = {
+            isa = "PBXShellScriptBuildPhase";
+            name = "Record Git build identity";
+            buildActionMask = "2147483647";
+            alwaysOutOfDate = "1";
+            files = ();
+            inputPaths = ();
+            outputPaths = ("$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/BuildIdentity.json",);
+            shellPath = "/bin/bash";
+            shellScript = "\"$SRCROOT/scripts/write-build-identity.sh\"";
+            runOnlyForDeploymentPostprocessing = "0";
+        };
+        A02800000000000000000001 = { isa = "PBXFileReference"; path = "Resources/ReleaseNotes.json"; lastKnownFileType = "text.json"; sourceTree = "<group>"; };
+        A02800000000000000000002 = { isa = "PBXBuildFile"; fileRef = "A02800000000000000000001"; };
+        A02700000000000000000001 = { isa = "PBXFileReference"; path = "Updates.swift"; lastKnownFileType = "sourcecode.swift"; sourceTree = "<group>"; };
+        A02700000000000000000002 = { isa = "PBXBuildFile"; fileRef = "A02700000000000000000001"; };
+        A02500000000000000000003 = { isa = "PBXFileReference"; path = "Native/MothSession.c"; lastKnownFileType = "sourcecode.c.c"; sourceTree = "<group>"; };
+        A02500000000000000000004 = { isa = "PBXBuildFile"; fileRef = "A02500000000000000000003"; };
+        A02500000000000000000001 = { isa = "PBXFileReference"; path = "SessionRecovery.swift"; lastKnownFileType = "sourcecode.swift"; sourceTree = "<group>"; };
+        A02500000000000000000002 = { isa = "PBXBuildFile"; fileRef = "A02500000000000000000001"; };
+        A02400000000000000000001 = { isa = "PBXFileReference"; path = "MothSwarm.swift"; lastKnownFileType = "sourcecode.swift"; sourceTree = "<group>"; };
+        A02400000000000000000002 = { isa = "PBXBuildFile"; fileRef = "A02400000000000000000001"; };
+        A02300000000000000000001 = { isa = "PBXFileReference"; path = "Resources/AboutMoth.png"; lastKnownFileType = "image.png"; sourceTree = "<group>"; };
+        A02300000000000000000002 = { isa = "PBXBuildFile"; fileRef = "A02300000000000000000001"; };
+        A02200000000000000000001 = { isa = "PBXFileReference"; path = "SiteScreenshots.swift"; lastKnownFileType = "sourcecode.swift"; sourceTree = "<group>"; };
+        A02200000000000000000002 = { isa = "PBXBuildFile"; fileRef = "A02200000000000000000001"; };
+        A02100000000000000000001 = { isa = "PBXFileReference"; path = "Benchmarks.swift"; lastKnownFileType = "sourcecode.swift"; sourceTree = "<group>"; };
+        A02100000000000000000002 = { isa = "PBXBuildFile"; fileRef = "A02100000000000000000001"; };
+        A02100000000000000000003 = { isa = "PBXFileReference"; path = "Native/MothBenchmark.c"; lastKnownFileType = "sourcecode.c.c"; sourceTree = "<group>"; };
+        A02100000000000000000004 = { isa = "PBXBuildFile"; fileRef = "A02100000000000000000003"; };
+        A02000000000000000000003 = { isa = "PBXFileReference"; path = "TextEncoding.swift"; lastKnownFileType = "sourcecode.swift"; sourceTree = "<group>"; };
+        A02000000000000000000004 = { isa = "PBXBuildFile"; fileRef = "A02000000000000000000003"; };
+        A02000000000000000000005 = { isa = "PBXFileReference"; path = "Native/MothEncoding.c"; lastKnownFileType = "sourcecode.c.c"; sourceTree = "<group>"; };
+        A02000000000000000000006 = { isa = "PBXBuildFile"; fileRef = "A02000000000000000000005"; };
+        A02000000000000000000001 = { isa = "PBXFileReference"; path = "Profiles.swift"; lastKnownFileType = "sourcecode.swift"; sourceTree = "<group>"; };
+        A02000000000000000000002 = { isa = "PBXBuildFile"; fileRef = "A02000000000000000000001"; };
+        A01600000000000000000003 = { isa = "PBXFileReference"; path = "FileActions.swift"; lastKnownFileType = "sourcecode.swift"; sourceTree = "<group>"; };
+        A01600000000000000000004 = { isa = "PBXBuildFile"; fileRef = "A01600000000000000000003"; };
+        A01600000000000000000001 = { isa = "PBXFileReference"; path = "Macros.swift"; lastKnownFileType = "sourcecode.swift"; sourceTree = "<group>"; };
+        A01600000000000000000002 = { isa = "PBXBuildFile"; fileRef = "A01600000000000000000001"; };
+        A01400000000000000000001 = { isa = "PBXFileReference"; path = "KeyboardSounds.swift"; lastKnownFileType = "sourcecode.swift"; sourceTree = "<group>"; };
+        A01400000000000000000002 = { isa = "PBXBuildFile"; fileRef = "A01400000000000000000001"; };
+        A01300000000000000000003 = { isa = "PBXFileReference"; path = "About.swift"; lastKnownFileType = "sourcecode.swift"; sourceTree = "<group>"; };
+        A01300000000000000000004 = { isa = "PBXBuildFile"; fileRef = "A01300000000000000000003"; };
+        A01900000000000000000001 = { isa = PBXFileReference; path = "LICENSE"; lastKnownFileType = text; sourceTree = SOURCE_ROOT; };
+        A01A00000000000000000001 = { isa = PBXBuildFile; fileRef = A01900000000000000000001; };
+        A01900000000000000000002 = { isa = PBXFileReference; path = "NOTICE"; lastKnownFileType = text; sourceTree = SOURCE_ROOT; };
+        A01A00000000000000000002 = { isa = PBXBuildFile; fileRef = A01900000000000000000002; };
+        A01900000000000000000003 = { isa = PBXFileReference; path = "FONT-PERMISSION"; lastKnownFileType = text; sourceTree = SOURCE_ROOT; };
+        A01A00000000000000000003 = { isa = PBXBuildFile; fileRef = A01900000000000000000003; };
+        A01900000000000000000004 = { isa = PBXFileReference; path = "TRADEMARKS"; lastKnownFileType = text; sourceTree = SOURCE_ROOT; };
+        A01A00000000000000000004 = { isa = PBXBuildFile; fileRef = A01900000000000000000004; };
+        A01300000000000000000005 = { isa = "PBXFileReference"; path = "THIRD-PARTY-NOTICES"; name = "THIRD-PARTY-NOTICES"; lastKnownFileType = "text"; sourceTree = SOURCE_ROOT; };
+        A01300000000000000000006 = { isa = "PBXBuildFile"; fileRef = "A01300000000000000000005"; };
+        A01300000000000000000001 = { isa = "PBXFileReference"; path = "WindowLayouts.swift"; lastKnownFileType = "sourcecode.swift"; sourceTree = "<group>"; };
+        A01300000000000000000002 = { isa = "PBXBuildFile"; fileRef = "A01300000000000000000001"; };
+        A01100000000000000000001 = { isa = "PBXFileReference"; path = "Settings.swift"; lastKnownFileType = "sourcecode.swift"; sourceTree = "<group>"; };
+        A01100000000000000000002 = { isa = "PBXBuildFile"; fileRef = "A01100000000000000000001"; };
+		000000000000000000000006 = {
+			isa = "PBXBuildFile";
+			fileRef = "000000000000000000000005";
+		};
+		D69929E89FFE4CB6AAB2A32B = {
+			isa = "XCLocalSwiftPackageReference";
+			relativePath = "Vendor/TOMLKit";
+		};
+		00000000000000000000001E = {
+			buildConfigurationList = "00000000000000000000001C";
+			packageReferences = (
+				"000000000000000000000011",
+				"D69929E89FFE4CB6AAB2A32B",
+			);
+			targets = (
+				"00000000000000000000001D",
+			);
+			developmentRegion = "en";
+			knownRegions = (
+				"en",
+				"Base",
+			);
+			isa = "PBXProject";
+			compatibilityVersion = "Xcode 14.0";
+			productRefGroup = "00000000000000000000000F";
+			projectDirPath = "";
+			attributes = {
+				LastUpgradeCheck = "1600";
+			};
+			hasScannedForEncodings = "0";
+			projectRoot = "";
+			mainGroup = "000000000000000000000010";
+		};
+		000000000000000000000019 = {
+			isa = "XCBuildConfiguration";
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = "NO";
+				INFOPLIST_KEY_NSHighResolutionCapable = "YES";
+                INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright (c) 2026 Thomas Edward Vaughan, trading as London Pixel Exchange. Source-available.";
+				MARKETING_VERSION = "0.27.3";
+				CODE_SIGN_IDENTITY = "-";
+				ENABLE_APP_SANDBOX = "NO";
+				MACOSX_DEPLOYMENT_TARGET = "13.0";
+				GENERATE_INFOPLIST_FILE = "YES";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				CODE_SIGN_STYLE = "Manual";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = "5.0";
+                SWIFT_OBJC_BRIDGING_HEADER = "Moth/Moth-Bridging-Header.h";
+                OTHER_LDFLAGS = "-liconv -lproc";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				CURRENT_PROJECT_VERSION = "63";
+				COMBINE_HIDPI_IMAGES = "YES";
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.getmoth.Moth";
+				ASSETCATALOG_COMPILER_APPICON_NAME = "Moth";
+			};
+			name = "Release";
+		};
+		000000000000000000000013 = {
+			isa = "PBXBuildFile";
+			productRef = "000000000000000000000012";
+		};
+		F84594E7507B4A8197C82A7A = {
+			isa = "PBXBuildFile";
+			fileRef = "432E0C6C2AEA41D284328839";
+		};
+		00000000000000000000000A = {
+			isa = "PBXBuildFile";
+			fileRef = "000000000000000000000009";
+		};
+		000000000000000000000005 = {
+			path = "TerminalWorkspace.swift";
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			sourceTree = "<group>";
+		};
+		00000000000000000000001D = {
+			productType = "com.apple.product-type.application";
+			productReference = "00000000000000000000000D";
+			buildConfigurationList = "00000000000000000000001B";
+			packageProductDependencies = (
+				"000000000000000000000012",
+				"7FA2844F4E434C6BB195BF44",
+			);
+			productName = "Moth";
+			isa = "PBXNativeTarget";
+			buildPhases = (
+				"000000000000000000000014",
+				"000000000000000000000016",
+				"000000000000000000000015",
+                "A02900000000000000000001",
+			);
+			dependencies = (
+			);
+			name = "Moth";
+			buildRules = (
+			);
+		};
+		000000000000000000000018 = {
+			isa = "XCBuildConfiguration";
+			buildSettings = {
+				SDKROOT = "macosx";
+				CLANG_ENABLE_MODULES = "YES";
+			};
+			name = "Debug";
+		};
+		000000000000000000000012 = {
+			isa = "XCSwiftPackageProductDependency";
+			package = "000000000000000000000011";
+			productName = "SwiftTerm";
+		};
+		7FA2844F4E434C6BB195BF44 = {
+			isa = "XCSwiftPackageProductDependency";
+			package = "D69929E89FFE4CB6AAB2A32B";
+			productName = "TOMLKit";
+		};
+		F4080F8A1C854EE48891BA01 = {
+			path = "ProcessInspector.swift";
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			sourceTree = "<group>";
+		};
+		432E0C6C2AEA41D284328839 = {
+			path = "ConfigurationDocument.swift";
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			sourceTree = "<group>";
+		};
+		00000000000000000000000F = {
+			isa = "PBXGroup";
+			name = "Products";
+			children = (
+				"00000000000000000000000D",
+			);
+			sourceTree = "<group>";
+		};
+		000000000000000000000004 = {
+			isa = "PBXBuildFile";
+			fileRef = "000000000000000000000003";
+		};
+		00000000000000000000001C = {
+			isa = "XCConfigurationList";
+			defaultConfigurationIsVisible = "0";
+			defaultConfigurationName = "Release";
+			buildConfigurations = (
+				"000000000000000000000018",
+				"00000000000000000000001A",
+			);
+		};
+		000000000000000000000017 = {
+			isa = "XCBuildConfiguration";
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = "YES";
+				INFOPLIST_KEY_NSHighResolutionCapable = "YES";
+                INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright (c) 2026 Thomas Edward Vaughan, trading as London Pixel Exchange. Source-available.";
+				MARKETING_VERSION = "0.27.3";
+				CODE_SIGN_IDENTITY = "-";
+				ENABLE_APP_SANDBOX = "NO";
+				MACOSX_DEPLOYMENT_TARGET = "13.0";
+				GENERATE_INFOPLIST_FILE = "YES";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				CODE_SIGN_STYLE = "Manual";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = "5.0";
+                SWIFT_OBJC_BRIDGING_HEADER = "Moth/Moth-Bridging-Header.h";
+                OTHER_LDFLAGS = "-liconv -lproc";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				CURRENT_PROJECT_VERSION = "63";
+				COMBINE_HIDPI_IMAGES = "YES";
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.getmoth.Moth";
+				ASSETCATALOG_COMPILER_APPICON_NAME = "Moth";
+			};
+			name = "Debug";
+		};
+		000000000000000000000011 = {
+			isa = "XCLocalSwiftPackageReference";
+			relativePath = "Vendor/SwiftTerm";
+		};
+		00000000000000000000000E = {
+			path = "Moth";
+			isa = "PBXGroup";
+			children = (
+                "A02700000000000000000001",
+                "A02000000000000000000003",
+                "A02000000000000000000005",
+                "A02200000000000000000001",
+                "A02100000000000000000001",
+                "A02100000000000000000003",
+                "A02000000000000000000001",
+                "A01600000000000000000003",
+                "A01600000000000000000001",
+                "A01400000000000000000001",
+                "A01300000000000000000003",
+                "A02500000000000000000001",
+                "A02500000000000000000003",
+                "A02400000000000000000001",
+                "A01900000000000000000001",
+                "A01900000000000000000002",
+                "A01900000000000000000003",
+                "A01900000000000000000004",
+                "A01300000000000000000005",
+                "A02300000000000000000001",
+                "A02800000000000000000001",
+                "A01300000000000000000001",
+                "A01100000000000000000001",
+				"000000000000000000000001",
+				"000000000000000000000003",
+				"000000000000000000000005",
+				"000000000000000000000007",
+				"000000000000000000000009",
+				"00000000000000000000000B",
+				"432E0C6C2AEA41D284328839",
+				"F4080F8A1C854EE48891BA01",
+				"DFC071FE0B464558A35ACDB8",
+				"D4568840A142446B8DA6D1E4",
+			);
+			sourceTree = "<group>";
+		};
+		000000000000000000000009 = {
+			path = "Resources/Fonts";
+			isa = "PBXFileReference";
+			lastKnownFileType = "folder";
+			sourceTree = "<group>";
+		};
+		000000000000000000000003 = {
+			path = "Configuration.swift";
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			sourceTree = "<group>";
+		};
+		00000000000000000000001B = {
+			isa = "XCConfigurationList";
+			defaultConfigurationIsVisible = "0";
+			defaultConfigurationName = "Release";
+			buildConfigurations = (
+				"000000000000000000000017",
+				"000000000000000000000019",
+			);
+		};
+		000000000000000000000016 = {
+			isa = "PBXFrameworksBuildPhase";
+			buildActionMask = "2147483647";
+			files = (
+				"000000000000000000000013",
+				"273401E0092D4049B9B5FAAD",
+			);
+			runOnlyForDeploymentPostprocessing = "0";
+		};
+		000000000000000000000010 = {
+			isa = "PBXGroup";
+			sourceTree = "<group>";
+			children = (
+				"00000000000000000000000E",
+				"00000000000000000000000F",
+			);
+		};
+		00000000000000000000000D = {
+			path = "Moth.app";
+			isa = "PBXFileReference";
+			explicitFileType = "wrapper.application";
+			sourceTree = "BUILT_PRODUCTS_DIR";
+		};
+		000000000000000000000008 = {
+			isa = "PBXBuildFile";
+			fileRef = "000000000000000000000007";
+		};
+		000000000000000000000002 = {
+			isa = "PBXBuildFile";
+			fileRef = "000000000000000000000001";
+		};
+		00000000000000000000001A = {
+			isa = "XCBuildConfiguration";
+			buildSettings = {
+				SDKROOT = "macosx";
+				CLANG_ENABLE_MODULES = "YES";
+			};
+			name = "Release";
+		};
+		273401E0092D4049B9B5FAAD = {
+			isa = "PBXBuildFile";
+			productRef = "7FA2844F4E434C6BB195BF44";
+		};
+		000000000000000000000015 = {
+			isa = "PBXResourcesBuildPhase";
+			buildActionMask = "2147483647";
+			files = (
+                "A01A00000000000000000001",
+                "A01A00000000000000000002",
+                "A01A00000000000000000003",
+                "A01A00000000000000000004",
+                "A01300000000000000000006",
+                "A02300000000000000000002",
+                "A02800000000000000000002",
+				"00000000000000000000000A",
+				"00000000000000000000000C",
+				"B448832A19EB48D4BDA7DF7E",
+			);
+			runOnlyForDeploymentPostprocessing = "0";
+		};
+		13529C8A92FD44DAAB37E5EE = {
+			isa = "PBXBuildFile";
+			fileRef = "F4080F8A1C854EE48891BA01";
+		};
+		00000000000000000000000C = {
+			isa = "PBXBuildFile";
+			fileRef = "00000000000000000000000B";
+		};
+		000000000000000000000007 = {
+			path = "SelfTest.swift";
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			sourceTree = "<group>";
+		};
+		000000000000000000000001 = {
+			path = "App.swift";
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			sourceTree = "<group>";
+		};
+		000000000000000000000014 = {
+			isa = "PBXSourcesBuildPhase";
+			buildActionMask = "2147483647";
+			files = (
+                "A02700000000000000000002",
+                "A02000000000000000000004",
+                "A02000000000000000000006",
+                "A02200000000000000000002",
+                "A02100000000000000000002",
+                "A02100000000000000000004",
+                "A02000000000000000000002",
+                "A01600000000000000000004",
+                "A01600000000000000000002",
+                "A01400000000000000000002",
+                "A01300000000000000000004",
+                "A02500000000000000000002",
+                "A02500000000000000000004",
+                "A02400000000000000000002",
+                "A01300000000000000000002",
+                "A01100000000000000000002",
+				"000000000000000000000002",
+				"000000000000000000000004",
+				"000000000000000000000006",
+				"000000000000000000000008",
+				"F84594E7507B4A8197C82A7A",
+				"13529C8A92FD44DAAB37E5EE",
+				"CCE361CAB66E412A9E5A10CA",
+			);
+			runOnlyForDeploymentPostprocessing = "0";
+		};
+		00000000000000000000000B = {
+			path = "Resources/showcase.sh";
+			isa = "PBXFileReference";
+			lastKnownFileType = "text.script.sh";
+			sourceTree = "<group>";
+		};
+		DFC071FE0B464558A35ACDB8 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "TerminalNavigation.swift";
+			sourceTree = "<group>";
+		};
+		CCE361CAB66E412A9E5A10CA = {
+			isa = "PBXBuildFile";
+			fileRef = "DFC071FE0B464558A35ACDB8";
+		};
+		D4568840A142446B8DA6D1E4 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "folder.iconcomposer";
+			path = "Resources/Moth.icon";
+			sourceTree = "<group>";
+		};
+		B448832A19EB48D4BDA7DF7E = {
+			isa = "PBXBuildFile";
+			fileRef = "D4568840A142446B8DA6D1E4";
+		};
+	};
+	rootObject = "00000000000000000000001E";
+}

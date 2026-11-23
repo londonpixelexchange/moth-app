@@ -1,0 +1,7 @@
+name: "Build and Test"
+
+on: ["push", "pull_request"]
+
+jobs:
+    "BuildAndTest":
+        uses: LebJe/SwiftWorkflows/.github/workflows/buildAndTest.yml@main

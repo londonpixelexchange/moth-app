@@ -1,0 +1,13 @@
+name: "Generate Documentation"
+
+on:
+    push:
+        branches:
+            - "main"
+
+jobs:
+    "GenerateDocumentation":
+        uses: LebJe/SwiftWorkflows/.github/workflows/generateDocumentation.yml@main
+        with:
+            TargetName: "TOMLKit"
+            DoccBundlePath: "Sources/TOMLKit/TOMLKit.docc"

@@ -1,0 +1,220 @@
+# Moth configuration
+# Save to reload every open window. Invalid edits keep the last valid settings.
+# textEncoding selects the session charset (UTF-8 is recommended).
+# enabledEncodings controls the app-wide encoding choices; current profile/session encodings remain valid when hidden.
+# closeOnExit: true closes an exited pane/tab, then the last window; false retains output and exit status.
+# alternateScreenScrollback saves received lines in mosh/full-screen sessions (bounded by scrollback).
+# ansiColors: [] for defaults, or 16 hex colours (normal 0–7, bright 8–15).
+# defaultProfileID: empty uses Default; otherwise a named profile UUID from Profiles/*.toml.
+# showLayoutsOnLaunch offers saved window layouts when the app launches.
+# Built-in colour themes: system, moth-dark, moth-light, github-dark-colorblind, github-light-colorblind, midnight, paper, forest, fire, dusk, snow, abyss, eclipse, wraith, graphite, sepia, moonlight, nocturne, copper, hemlock, vellum, lilac, tideline.
+# Choose colours and motion in Settings (Cmd+,).
+# An enabled [palette] overrides theme colours; set palette.enabled = false to use built-ins.
+
+theme = 'system'
+ansiColors = []
+showLayoutsOnLaunch = false
+defaultProfileID = ''
+fontName = 'WumpusMonoPro-Regular'
+fontSize = 14.0
+scrollback = 10000
+alternateScreenScrollback = true
+closeOnExit = true
+textEncoding = 'UTF-8'
+enabledEncodings = [
+    'UTF-8',
+    'ASCII',
+    'ISO-8859-1',
+    'ISO-8859-15',
+    'WINDOWS-1252',
+    'MACINTOSH',
+    'ISO-8859-2',
+    'WINDOWS-1250',
+    'ISO-8859-7',
+    'ISO-8859-9',
+    'KOI8-R',
+    'WINDOWS-1251',
+    'SHIFT_JIS',
+    'EUC-JP',
+    'GB18030',
+    'BIG5',
+    'EUC-KR'
+]
+shell = '/bin/zsh'
+# false preserves macOS keyboard-layout characters such as Option+3 for #.
+# Enable only to send Option combinations as terminal Meta sequences.
+optionAsMeta = false
+
+# lineHeight: cell height multiplier (1–2). characterSpacing: extra points per cell (0–6).
+# antialias: smooth text edges (true by default); false draws crisp pixel edges.
+# ligatures: opt in to programming ligatures; useBold/useItalic enable ANSI font styles.
+# [typography.features] contains four-character OpenType tags and integer values (0=off, 1=on).
+# Empty features use font defaults; disabling ligatures overrides liga/calt/dlig/hlig.
+[typography]
+antialias = true
+characterSpacing = 0.0
+ligatures = false
+lineHeight = 1.0
+useBold = true
+useItalic = true
+
+[typography.features]
+
+# Tabs/session info placement and the inside window border.
+# chromePosition: bottom or titlebar; showTabBar and showStatusBar control visibility. Colours are six hex digits, without #.
+# showBorder: false hides the custom border without losing its saved paint/width.
+# opacity: 0–1, background only; text stays opaque. frosted: native blur behind the window.
+# frostIntensity: 0–1, blending clear glass with the full native frosting effect.
+# Lower opacity reveals the desktop or frosting. Reduce Transparency makes the background opaque.
+[window]
+borderColor = '596582'
+borderWidth = 1.0
+chromePosition = 'bottom'
+frostIntensity = 1.0
+frosted = false
+opacity = 1.0
+showBorder = true
+showStatusBar = true
+showTabBar = true
+
+# Border paint: type = solid | linear; colors = [] inherits borderColor.
+# Gradients use 2–6 six-digit colours. angle controls the linear direction.
+[window.borderPaint]
+angle = 90.0
+colors = []
+type = 'solid'
+
+# style: flow for animation, solid for a plain background, or image for a picture.
+# imagePath: local image file (supports ~); imageScale: fill or fit; imageOpacity: 0–1.
+# effectColors: 2–6 animation colours; [] uses the default palette.
+# intensity is Strength (0–1); speed controls motion. background.paint applies only when Off.
+# Motion respects Reduce Motion.
+[background]
+animated = true
+effectColors = []
+imageOpacity = 0.35
+imagePath = ''
+imageScale = 'fill'
+intensity = 0.22
+speed = 0.5
+style = 'flow'
+
+# type: solid | linear. colors: six-digit hex values; empty inherits the theme.
+# Gradients accept 2–6 stops. angle: 0–360 degrees for linear gradients.
+[background.paint]
+angle = 90.0
+colors = []
+type = 'solid'
+
+# shape: block | underline | bar. animation: breathe | blink | noblink.
+# period is a full animation cycle in seconds (0.2–5). View > Cursor saves these settings.
+[cursor]
+animation = 'breathe'
+period = 1.4
+shape = 'block'
+
+# type: solid | linear. colors: six-digit hex values; empty inherits the theme.
+# Gradients accept 2–6 stops. angle: 0–360 degrees for linear gradients.
+[cursor.paint]
+angle = 90.0
+colors = []
+type = 'solid'
+
+# mode: visual (default), sound, both, or off.
+# style: border (pane edge), flash (soft pane wash), window-border (whole window edge).
+# intensity: 0–1; flash peaks at 18% of this value. thickness: border width in points (1–12).
+# sound: system name such as Glass, Ping, Pop, or an absolute audio path. volume: 0–1.
+# badge: count bells on the Dock icon; clears when Moth becomes active.
+# duration: visual highlight seconds (0.08–1). color: empty uses the theme accent, or six hex digits.
+[bell]
+badge = true
+color = ''
+duration = 0.2
+intensity = 1.0
+mode = 'visual'
+sound = 'Glass'
+style = 'border'
+thickness = 3.0
+volume = 0.5
+
+# enabled: typing sounds, off by default. Toggle with Cmd+Option+K.
+# style: drip | tink | wood | notes (Soft Keys) | glass | pluck | bells | marimba | custom.
+# volume: 0–1 (quiet default 0.12). reverb: 0–1 (dry to spacious).
+# key: C, C#, D, D#, E, F, F#, G, G#, A, A#, B.
+# musical: false plays the natural sound; true enables key, mode and pattern.
+# mode: ionian | dorian | phrygian | lydian | mixolydian | aeolian | locrian.
+# pattern: ascending | descending | random | arpeggiating.
+# files: absolute audio-file paths for style = custom (up to 16 clips, 10 seconds each).
+# Multiple files rotate; musical custom playback treats the original as C4 and changes speed.
+# Shortcuts and pasted text stay silent.
+[keyboardSound]
+enabled = false
+files = []
+key = 'C'
+mode = 'lydian'
+musical = false
+pattern = 'random'
+reverb = 0.15
+style = 'drip'
+volume = 0.12
+
+# Skip confirmation only when EVERY local program in the session is allowed.
+# Includes foreground and background children: allowing zsh does not allow its running jobs.
+# Use exact executable names (zsh, vim) or absolute paths. No wildcard matching.
+# enabled = false disables all close/quit confirmations, including unidentified processes.
+[closeConfirmation]
+enabled = true
+ignorePrograms = [ 'zsh', 'bash', 'fish', 'sh', 'dash', 'tcsh', 'csh', 'nu' ]
+
+# checkAtLaunch checks getmoth.dev for releases at launch. Downloads open in your browser. App-wide.
+[updates]
+checkAtLaunch = true
+
+# allowDoubleSizeLines enables DEC double-width and double-height lines (app-wide).
+# Disabled ignores size requests and returns existing lines to normal.
+# sessionRecovery keeps new PTYs in a local helper for reconnection after an app crash. Up to 64 MB of output per pane stays in helper memory.
+# inheritWorkingDirectory uses the local shell cwd for new tabs and splits; new windows use workingDirectory.
+# Launch environment and directory apply to new sessions. Empty paths use defaults or disable logging.
+# logDirectory writes raw terminal output; clipboard writes are disabled by default.
+[advanced]
+allowDoubleSizeLines = true
+allowRemoteClipboard = false
+copyOnSelect = false
+inheritWorkingDirectory = true
+logDirectory = ''
+loginShell = true
+sessionRecovery = true
+workingDirectory = ''
+
+[advanced.environment]
+
+# Command shortcuts. selectTab1–selectTab9 select the matching tab in the active window.
+[keybindings]
+closePane = 'cmd+w'
+newTab = 'cmd+t'
+newWindow = 'cmd+n'
+nextPane = 'cmd+]'
+toggleMaximizePane = 'cmd+shift+return'
+nextTab = 'cmd+shift+]'
+openLayouts = 'cmd+shift+r'
+reloadConfig = 'cmd+alt+r'
+resetTerminal = 'cmd+r'
+selectTab1 = 'cmd+1'
+selectTab2 = 'cmd+2'
+selectTab3 = 'cmd+3'
+selectTab4 = 'cmd+4'
+selectTab5 = 'cmd+5'
+selectTab6 = 'cmd+6'
+selectTab7 = 'cmd+7'
+selectTab8 = 'cmd+8'
+selectTab9 = 'cmd+9'
+splitDown = 'cmd+shift+d'
+splitRight = 'cmd+d'
+toggleKeyboardSounds = 'cmd+alt+k'
+
+# Optional custom terminal palette; uncomment this section to enable.
+# [palette]
+# enabled = true
+# background = "151820"
+# foreground = "DFE4EF"
+# accent = "A5B8FF"

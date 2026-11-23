@@ -1,0 +1,212 @@
+{
+  "sourceIcons": {
+    "sha256": "bb0dddbf1cccb72d72849099a5a3e2db1179197ca723a5b7e183c9258a14c0e1",
+    "version": "Version 1.027;Nerd Fonts 3.4.0-96"
+  },
+  "fontToolsVersion": "4.68.0",
+  "addedCodepoints": 10571,
+  "addedGlyphs": 10571,
+  "faces": [
+    {
+      "source": "WumpusMonoPro-Bold.ttf",
+      "sourceSHA256": "7c668617dc6fd25830c12fda718c294b5b20051d70d41b54274120dfdf18535a",
+      "file": "TTF/WumpusMonoProNerdFontMono-Bold.ttf",
+      "sha256": "d8c31a29101ca956209ed8472d2d1bb80adc0d7d9b24004f634245eabf41991c",
+      "glyphs": 11161,
+      "originalGlyphs": 590,
+      "variable": false
+    },
+    {
+      "source": "WumpusMonoPro-BoldItalic.ttf",
+      "sourceSHA256": "14b7f0bb14ef740e942f929ec5e5b9b8a17ea3b800986411e5b554111bba7cc9",
+      "file": "TTF/WumpusMonoProNerdFontMono-BoldItalic.ttf",
+      "sha256": "fe944a5629de13604e2e4eada1b6c2abba4049a8ca4e63eaeedcd4f1690e65dd",
+      "glyphs": 11161,
+      "originalGlyphs": 590,
+      "variable": false
+    },
+    {
+      "source": "WumpusMonoPro-Italic.ttf",
+      "sourceSHA256": "19e5efed56ff94e1c5890836019728de9c2b8c7a47d36afb360b8791b31bde44",
+      "file": "TTF/WumpusMonoProNerdFontMono-Italic.ttf",
+      "sha256": "29d3bb5010415e05c69e9f45ccc47c5f5f7e93c2081812abc889935c5489a93f",
+      "glyphs": 11161,
+      "originalGlyphs": 590,
+      "variable": false
+    },
+    {
+      "source": "WumpusMonoPro-Light.ttf",
+      "sourceSHA256": "c0c15c03d782009190b78f07358a309e95089ef44e9d08ab0d9bc9b56d70aba7",
+      "file": "TTF/WumpusMonoProNerdFontMono-Light.ttf",
+      "sha256": "acb6e7d0ba8fe93ac7ef4b80dff49ddccac82e5d93bec8ba06a78d1a05edffc8",
+      "glyphs": 11161,
+      "originalGlyphs": 590,
+      "variable": false
+    },
+    {
+      "source": "WumpusMonoPro-LightItalic.ttf",
+      "sourceSHA256": "42be64239a01cfc871a3b6826ad85f3a5ab635468c21189ce83c8d765e813b8c",
+      "file": "TTF/WumpusMonoProNerdFontMono-LightItalic.ttf",
+      "sha256": "c392b4be86e0199f099949a9b3cba16cc6bb0854fc48d8a7ef9c32e778b2bf26",
+      "glyphs": 11161,
+      "originalGlyphs": 590,
+      "variable": false
+    },
+    {
+      "source": "WumpusMonoPro-Medium.ttf",
+      "sourceSHA256": "189c466828a3ce808b980c3ebd595416cce10d456dc6aea09a0c65fe81685f02",
+      "file": "TTF/WumpusMonoProNerdFontMono-Medium.ttf",
+      "sha256": "d9f1dfc00f1247bb83e3f9ba0214879d5bafeb3e9f2f67267b3d15eb9a5091c9",
+      "glyphs": 11161,
+      "originalGlyphs": 590,
+      "variable": false
+    },
+    {
+      "source": "WumpusMonoPro-MediumItalic.ttf",
+      "sourceSHA256": "75a34fd420a751a96c80b088f270d6694051f900bdd9784da3d5462254e094e5",
+      "file": "TTF/WumpusMonoProNerdFontMono-MediumItalic.ttf",
+      "sha256": "02781b7549a2a8f485a43d24a921c594c14950cacac785130efb26620763bcfd",
+      "glyphs": 11161,
+      "originalGlyphs": 590,
+      "variable": false
+    },
+    {
+      "source": "WumpusMonoPro-Regular.ttf",
+      "sourceSHA256": "997d794b951713d3a0790fbc07a011595332ec6647ba6d84481800994724638c",
+      "file": "TTF/WumpusMonoProNerdFontMono-Regular.ttf",
+      "sha256": "17b5d9b1462584817a81f1d377a2256df8af3bfcdd970a8ae1ba9c3a398b2700",
+      "glyphs": 11161,
+      "originalGlyphs": 590,
+      "variable": false
+    },
+    {
+      "source": "WumpusMonoPro-SemiBold.ttf",
+      "sourceSHA256": "072e4581723e092736323f4d4f8e82c8b12911a209cc301bcade1d4376722e45",
+      "file": "TTF/WumpusMonoProNerdFontMono-SemiBold.ttf",
+      "sha256": "41b5eaa61b7075e09afdad0602481fc906a3b73e4db56dad98ca2bb1c4615e2b",
+      "glyphs": 11161,
+      "originalGlyphs": 590,
+      "variable": false
+    },
+    {
+      "source": "WumpusMonoPro-SemiBoldItalic.ttf",
+      "sourceSHA256": "ef4aadc02e616ebd517cb44a33ec74b33cdefb52a3b361421fc84a4830a2dfbf",
+      "file": "TTF/WumpusMonoProNerdFontMono-SemiBoldItalic.ttf",
+      "sha256": "81aa675fbde245ac32336fdc43363cecd0bc77f44603c3fcf45a6a072b3f386b",
+      "glyphs": 11161,
+      "originalGlyphs": 590,
+      "variable": false
+    },
+    {
+      "source": "WumpusMonoPro-Thin.ttf",
+      "sourceSHA256": "713314eff59877007f7bbfeb012ef5e8451cdc33e26190ba3ec64dcda4472bcb",
+      "file": "TTF/WumpusMonoProNerdFontMono-Thin.ttf",
+      "sha256": "85fd90c298354a2bff9ec298747b1502d492fb330ac3f9a303944939c626f252",
+      "glyphs": 11161,
+      "originalGlyphs": 590,
+      "variable": false
+    },
+    {
+      "source": "WumpusMonoPro-ThinItalic.ttf",
+      "sourceSHA256": "c2dbd9e6d516dba2bcaf8fdb812f864144c5e8b1d359a2c0102181c56d5b7539",
+      "file": "TTF/WumpusMonoProNerdFontMono-ThinItalic.ttf",
+      "sha256": "2b35fe28743a27f7dc1bf93d54047561b1aad1b7fd2b8395c24ece687579531c",
+      "glyphs": 11161,
+      "originalGlyphs": 590,
+      "variable": false
+    },
+    {
+      "source": "WumpusMonoPro-UltraLight.ttf",
+      "sourceSHA256": "63bd1bd3276012494c42a2426a787d596afe92c9c815586e2ae6d0484d99ff81",
+      "file": "TTF/WumpusMonoProNerdFontMono-UltraLight.ttf",
+      "sha256": "b2fba11fe91b5039e3e6c1f65d873218949764e4293c12109af93a9ed1100e6c",
+      "glyphs": 11161,
+      "originalGlyphs": 590,
+      "variable": false
+    },
+    {
+      "source": "WumpusMonoPro-UltraLightItalic.ttf",
+      "sourceSHA256": "c6f5333688454a9f2c2abc4e1187bc2fbad821d7a7d4175bb48ac55119ba8966",
+      "file": "TTF/WumpusMonoProNerdFontMono-UltraLightItalic.ttf",
+      "sha256": "b16013547e23e959a12d4294e4c1f52370eec9774cc326322bd550db8d14d63f",
+      "glyphs": 11161,
+      "originalGlyphs": 590,
+      "variable": false
+    },
+    {
+      "source": "WumpusMonoProVF.ttf",
+      "sourceSHA256": "f10cfa6b3243734b3e75e47c469c1b4a276fa0df756e7c5da4b11ed749a0830e",
+      "file": "TTF/WumpusMonoProNerdFontMono-Variable.ttf",
+      "sha256": "5303f6370ec5ff43220dedc9b6941c3d0ba8fe035658b40ae88799ddd79ba3c3",
+      "glyphs": 11161,
+      "originalGlyphs": 590,
+      "variable": true
+    }
+  ],
+  "appFonts": [
+    {
+      "file": "WumpusMonoPro-Bold.ttf",
+      "sha256": "5b12896e6bd74568636896acb62ba07365e39f80cdb5e8e2e430340dbaa579b2"
+    },
+    {
+      "file": "WumpusMonoPro-BoldItalic.ttf",
+      "sha256": "29ea0d8f7cfb66ce97218f40802ed13656329ad715dfd3e09168f47329b66b33"
+    },
+    {
+      "file": "WumpusMonoPro-Italic.ttf",
+      "sha256": "23ea15f872225931932954adcf26d5c0fb9c3275f1c25b837fb41b10268154bc"
+    },
+    {
+      "file": "WumpusMonoPro-Light.ttf",
+      "sha256": "c9cbbec5b612bf3985123c1b9a30d9e1bf32de36b923169c9cab1686a61f4945"
+    },
+    {
+      "file": "WumpusMonoPro-LightItalic.ttf",
+      "sha256": "81692e607fca79143cc2f6af6538d30fbfb740d4f974357637c829b8b549c5d4"
+    },
+    {
+      "file": "WumpusMonoPro-Medium.ttf",
+      "sha256": "3a3ced83bb6164a1dc0f26886602f75880ac46e0c3e8afeb48a285d39c499b92"
+    },
+    {
+      "file": "WumpusMonoPro-MediumItalic.ttf",
+      "sha256": "d6355041c589ac1bbb03fdb36ddac979ee4a1e180d66ecbaf6ed505e91d260d7"
+    },
+    {
+      "file": "WumpusMonoPro-Regular.ttf",
+      "sha256": "bc71fe6f27f0410a4ca2dd50f0f5f92892bb7c5e7e4deb19d238cf50a7ee97e0"
+    },
+    {
+      "file": "WumpusMonoPro-SemiBold.ttf",
+      "sha256": "dae36258d35700a5b96f42b1da21247b128b31f20f9a93afb93ff1ce6779bfaf"
+    },
+    {
+      "file": "WumpusMonoPro-SemiBoldItalic.ttf",
+      "sha256": "746202f975cff32479d4f1ccd056936a66e50fe18e42789cd9d938959fc8c1a7"
+    },
+    {
+      "file": "WumpusMonoPro-Thin.ttf",
+      "sha256": "519061bc46fd6714441de98cbc600e0c3ffe23544c94881d958a2de3baec75ae"
+    },
+    {
+      "file": "WumpusMonoPro-ThinItalic.ttf",
+      "sha256": "d690d215b0b16107e31e182bd7b594e04082d067914a2489112d7c338aa196e1"
+    },
+    {
+      "file": "WumpusMonoPro-UltraLight.ttf",
+      "sha256": "735f8799fe13c8adfd92f14c4af4cb0e21169e19f76555ca071b992798dbf0d4"
+    },
+    {
+      "file": "WumpusMonoPro-UltraLightItalic.ttf",
+      "sha256": "861630bbe764e7de57a2d5cd3926c9e935493a85c3bba086d7ca36bc124571ed"
+    }
+  ],
+  "symbols": {
+    "file": "MothNerdSymbolsMono-Regular.ttf",
+    "sha256": "b672bd06168d65993b0ea14b9a9df46a0f2910452be7881a6eadaf9671455b8f",
+    "codepoints": 10572
+  },
+  "sourceArchiveSHA256": "ae6cb6c6763119e523731cd90adc0e813d54260bec191f6d28a168c1822c8fa5",
+  "brotliVersion": "1.2.1",
+  "buildScriptSHA256": "eee5c5c9767973467825975e4bf1abb418f443de94f061817bc0fb7862941fbc"
+}

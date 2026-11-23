@@ -1,0 +1,13 @@
+.DS_Store
+/.build
+/Packages
+/*.xcodeproj
+xcuserdata/
+/.swiftpm
+Package.resolved
+Brewfile.lock.json
+Sources/TOMLKit/TOMLKit.docc/.docc-build
+TOMLKit.doccarchive
+docs/
+.vscode
+node_modules

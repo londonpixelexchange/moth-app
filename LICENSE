@@ -1,0 +1,206 @@
+Moth Source-Available Licence, version 1.0
+
+Copyright (c) 2026 Thomas Edward Vaughan, trading as London Pixel Exchange
+("the Owner").
+
+This is a source-available licence. It is not an open-source licence as
+defined by the Open Source Initiative, because it restricts charging for
+copies.
+
+
+0. Purpose
+
+0.1  Moth is meant to be free. Anyone may use it, inspect it, improve it,
+     extend it, change it and share it. Nobody may charge for Moth, or for
+     anything built from its code, without the Owner's permission. Moths are
+     free creatures.
+
+0.2  Where any part of this licence is unclear, it is to be read in the way
+     that best fits section 0.1.
+
+
+1. What this licence covers
+
+1.1  This licence applies to the source code, build scripts and documentation
+     of Moth in which the Owner holds copyright, or which has been contributed
+     to the official Moth project under section 8, whether or not an
+     individual file carries a notice saying so (the "Covered Code").
+
+1.2  It does not apply to:
+     (a) third-party libraries and other files under their own licences,
+         listed in THIRD-PARTY-NOTICES, which keep their own terms;
+     (b) the Wumpus Mono Pro font files, which are covered by a separate
+         permission in FONT-PERMISSION; or
+     (c) the Moth name, icon and logo, which are covered by the Moth Name and
+         Icon Policy in TRADEMARKS.
+     For a third-party file, its own licence applies if it conflicts with
+     this one.
+
+
+2. Definitions
+
+2.1  "You" means anyone using the permissions in this licence. "Your
+     organisation" means any organisation you act for, together with any
+     organisation that controls it, that it controls, or that is under common
+     control with it.
+
+2.2  "Fork" means any work that contains all or a substantial part of the
+     Covered Code, or is derived from it, whether modified or not.
+
+2.3  "Distribute" means giving or making available a copy of Moth or a Fork,
+     in source or binary form, to anyone outside you and your organisation.
+     Copying within your organisation, including to contractors working on
+     its behalf, is not distributing.
+
+2.4  "Corresponding Source" means the source code, in the form preferred for
+     making changes, for everything in the binary you Distribute, together
+     with the build scripts, project files and instructions needed to build
+     that binary. It does not include operating system components, or
+     third-party components that you identify together with where their
+     source or terms can be obtained.
+
+2.5  "Charge" has the meaning given in section 5.2.
+
+
+3. What you may do
+
+3.1  Use. You may run and use Moth or a Fork for any purpose, including
+     commercial work, paid work for clients and internal business use. Use
+     alone carries no other conditions, and anything you create with Moth
+     belongs to you.
+
+3.2  Modify. You may modify the Covered Code and create Forks. If you do not
+     Distribute your changes, you need not publish or disclose them.
+
+3.3  Distribute. You may Distribute copies of Moth or a Fork, in source or
+     binary form, if you follow sections 4 and 5.
+
+3.4  Patents. The Owner also grants you a licence under any patents the Owner
+     owns or controls that would otherwise be infringed by doing what
+     sections 3.1 to 3.3 allow. This patent licence ends if you bring a claim
+     that Moth infringes a patent.
+
+3.5  Scope. These permissions are worldwide, non-exclusive and royalty-free,
+     and last for the full term of copyright unless they end under section 6.
+
+
+4. Conditions when you Distribute
+
+4.1  Notices. You must keep intact all copyright notices, this licence, the
+     NOTICE file and the third-party notices, and include a copy of this
+     licence with every copy.
+
+4.2  Same terms. You must Distribute the Covered Code, and any changes you
+     make to it, only under this licence. New files you write that contain no
+     Covered Code may carry their own licence, but sections 4.3 and 5 still
+     apply to the Fork as a whole.
+
+4.3  Source. With every binary you Distribute, you must either include the
+     Corresponding Source or make it available to every recipient free of
+     charge, from the same place or a place you clearly point to, for as long
+     as you Distribute that binary. You must not require payment, a
+     subscription or a membership to obtain it.
+
+4.4  Changes. A modified Fork must state prominently that it has been
+     modified, by whom, and that it is not the official Moth.
+
+4.5  No extra restrictions. You must not impose terms that stop recipients
+     using the rights this licence gives them. One exception: you may
+     Distribute through an app store or similar platform whose standard terms
+     apply to all apps, if the listing is free of charge, the Corresponding
+     Source is available as section 4.3 requires, and the listing or app
+     states that this licence applies.
+
+
+5. Charging needs permission
+
+5.1  You must not Charge for Moth or a Fork without the Owner's written
+     permission. Email counts as written permission.
+
+5.2  "Charge" means asking for, requiring or accepting money or anything else
+     of value as a condition of obtaining, downloading, installing,
+     unlocking, updating or continuing to use a copy of Moth or a Fork. It
+     includes, for example:
+     (a) a price on an app store or marketplace listing, even if the same
+         build is available free of charge elsewhere;
+     (b) a subscription, membership, patron or supporter tier that gives
+         access to a build, an early-access build, an update or a feature
+         containing Covered Code;
+     (c) a paid edition, add-on, upgrade, unlock code or licence key for
+         software that contains Covered Code; and
+     (d) supplying a copy as part of a bundle, package, device, course or
+         service that people pay for, even if the copy is described as free
+         or the price is attributed to other items.
+
+5.3  None of these is Charging:
+     (a) voluntary donations, tips or sponsorship, if nothing about
+         obtaining, installing, updating or using the software is withheld
+         from people who do not pay;
+     (b) optional paid support, consulting, installation help, training or
+         custom development, if the identical build is available free of
+         charge to everyone at the same time, and paying gives no access to a
+         copy that non-payers cannot get;
+     (c) selling your own products or services that do not include a copy of
+         Moth or a Fork, including a paid product that links to or recommends
+         a place where anyone can download Moth or the Fork free of charge;
+         and
+     (d) charging for work you do using Moth, or for anything you create
+         with it.
+
+5.4  Asking. Permissive exceptions are considered. If you would like to
+     charge for Moth or a Fork, or are unsure whether something counts as
+     Charging, email support@getmoth.dev. A permission covers only what it
+     expressly says.
+
+
+6. Ending the licence
+
+6.1  If you break this licence, your permissions under it end automatically.
+
+6.2  If it is the first time the Owner has told you about a breach, and you
+     put it right within 30 days of being told, your permissions are
+     restored. Putting a breach right includes withdrawing any listing or
+     offer that Charges.
+
+6.3  Anyone who received a copy from you keeps their permissions as long as
+     they comply with this licence.
+
+
+7. No warranty, limited liability
+
+7.1  Moth is provided "as is", without warranty of any kind, to the extent
+     the law allows.
+
+7.2  To the extent the law allows, the Owner and contributors are not liable
+     for any loss or damage arising from Moth or this licence. Nothing in
+     this licence limits liability that cannot legally be limited, such as
+     liability for death or personal injury caused by negligence, or for
+     fraud.
+
+
+8. Contributions
+
+8.1  If you send a contribution to the official Moth project, you license it
+     under this licence. You also allow the Owner to grant others the
+     permissions described in section 5.4 for it, and to license it under
+     later versions of this licence. You confirm that you have the right to
+     do so.
+
+
+9. Name and icon
+
+9.1  This licence gives no right to use the Moth name, icon or logo, except
+     to state truthfully where the software came from. See TRADEMARKS.
+
+
+10. Later versions
+
+10.1 The Owner may publish revised versions of this licence. You may use
+     Covered Code received under this version on its terms or on the terms
+     of any later version the Owner publishes.
+
+
+11. Governing law
+
+11.1 This licence is governed by the law of England and Wales, and the courts
+     of England and Wales have non-exclusive jurisdiction.
