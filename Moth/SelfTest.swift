@@ -644,8 +644,17 @@ enum SelfTest {
         var invalid = config; invalid.cursor.paint.type = "unknown"
         do { try invalid.validate(); checks["invalidPaintRejected"] = false } catch { checks["invalidPaintRejected"] = true }
         app.config.bell.mode = "visual"; app.config.bell.badge = true; app.active?.workspace.active.apply(app.config)
-        app.clearBellBadge(nil); app.active?.workspace.active.terminal.feed(text: "\u{7}\u{7}\u{7}")
+        let bellWorkspace = app.active?.workspace, originalBellHandler = bellWorkspace?.bell
+        bellWorkspace?.bell = { [weak app] in app?.recordBell(appIsActive: false) }
+        app.clearBellBadge(nil); bellWorkspace?.active.terminal.feed(text: "\u{7}\u{7}\u{7}")
         checks["bellBadgeCountsEvenRateLimitedBells"] = app.bellCount == 3 && NSApp.dockTile.badgeLabel == "3"
+        bellWorkspace?.bell = originalBellHandler
+        app.recordBell(appIsActive: true)
+        checks["foregroundBellClearsAccumulatedBadge"] = app.bellCount == 0 && NSApp.dockTile.badgeLabel == nil
+        for _ in 0..<3 { app.recordBell(appIsActive: true) }
+        checks["foregroundBellsDoNotAccumulateBadge"] = app.bellCount == 0 && NSApp.dockTile.badgeLabel == nil
+        app.recordBell(appIsActive: false)
+        checks["backgroundBellsResumeBadgeCount"] = app.bellCount == 1 && NSApp.dockTile.badgeLabel == "1"
         app.applicationDidBecomeActive(Notification(name: NSApplication.didBecomeActiveNotification))
         checks["bellBadgeClearsWhenAppActivated"] = app.bellCount == 0 && NSApp.dockTile.badgeLabel == nil
         app.config.bell.badge = false; app.active?.workspace.active.apply(app.config); app.active?.workspace.active.terminal.feed(text: "\u{7}")

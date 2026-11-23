@@ -23,7 +23,8 @@ final class App: NSObject, NSApplicationDelegate, NSMenuItemValidation {
     let updateChecker = UpdateChecker()
     weak var lastTerminalWindow: TerminalWindowController?
     private(set) var bellCount = 0
-    func recordBell() {
+    func recordBell(appIsActive: Bool = NSApp.isActive) {
+        guard !appIsActive else { clearBellBadge(nil); return }
         bellCount = bellCount == Int.max ? Int.max : bellCount + 1
         NSApp.dockTile.badgeLabel = String(bellCount)
     }

@@ -8,7 +8,8 @@
         "title": "Fixed",
         "items": [
           "Text selections remain active when new terminal output arrives and stay anchored as scrollback moves.",
-          "Double-clicking a separating dot selects the complete address."
+          "Double-clicking a separating dot selects the complete address.",
+          "The Dock bell badge clears on focus and counts bells only while Moth is inactive."
         ]
       },
       {
