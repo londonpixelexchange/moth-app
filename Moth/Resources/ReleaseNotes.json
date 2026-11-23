@@ -1,5 +1,25 @@
 [
   {
+    "version": "0.27.5",
+    "build": 65,
+    "status": "released",
+    "sections": [
+      {
+        "title": "Fixed",
+        "items": [
+          "Text selections remain active when new terminal output arrives and stay anchored as scrollback moves.",
+          "Double-clicking a separating dot selects the complete address."
+        ]
+      },
+      {
+        "title": "Improved",
+        "items": [
+          "Link previews use small Wumpus Mono Pro italic text."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.4",
     "build": 64,
     "status": "released",
