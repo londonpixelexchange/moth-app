@@ -24,7 +24,6 @@ final class AboutWindowController: NSWindowController {
     static let horizontalPadding: CGFloat = 32
     static let verticalPadding: CGFloat = 24
     let websites = [("getmoth.dev","https://getmoth.dev")]
-    let copyrightText = NSTextField(labelWithString:"")
     init() {
         let window = NSWindow(contentRect:NSRect(x:0,y:0,width:480,height:460),styleMask:[.titled,.closable],backing:.buffered,defer:false)
         super.init(window:window)
@@ -71,9 +70,6 @@ final class AboutWindowController: NSWindowController {
             }
         }
         let notices = NSButton(title:"Licences…",target:self,action:#selector(showLicences(_:))); notices.bezelStyle = .inline; notices.font = .systemFont(ofSize:11); styleLink(notices); stack.addArrangedSubview(notices)
-        stack.setCustomSpacing(14,after:notices)
-        copyrightText.stringValue = Bundle.main.object(forInfoDictionaryKey:"NSHumanReadableCopyright") as? String ?? "© 2026 T E Vaughan"
-        copyrightText.maximumNumberOfLines = 0; copyrightText.alignment = .center; copyrightText.font = .systemFont(ofSize:11); copyrightText.textColor = .secondaryLabelColor; stack.addArrangedSubview(copyrightText); copyrightText.widthAnchor.constraint(equalTo:stack.widthAnchor).isActive = true
         root.layoutSubtreeIfNeeded()
         window.setContentSize(NSSize(width:480,height:ceil(stack.fittingSize.height)+Self.verticalPadding*2))
         root.layoutSubtreeIfNeeded(); window.center()
