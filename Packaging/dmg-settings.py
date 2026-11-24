@@ -8,7 +8,6 @@ files = [(str(app), "Moth.app")]
 symlinks = {"Applications": "/Applications"}
 icon = str(app / "Contents/Resources/Moth.icns")
 background = defines["background"]
-hide_extensions = ["Moth.app"]
 icon_locations = {"Moth.app": (180, 260), "Applications": (580, 260)}
 window_rect = ((120, 120), (760, 508))
 icon_size = 112

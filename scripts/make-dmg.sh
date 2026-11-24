@@ -34,5 +34,6 @@ if [[ ! -s "$MOUNT/.DS_Store" ]] || ! LC_ALL=C grep -aq 'backgroundImageAlias' "
     echo 'Installer is missing its Finder background reference.' >&2
     exit 1
 fi
+codesign --verify --deep --strict "$MOUNT/Moth.app"
 hdiutil detach "$MOUNT"
 mv -f "$WORK/installer.dmg" "$OUTPUT"
