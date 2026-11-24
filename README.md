@@ -1,6 +1,4 @@
-# Moth
-
-A native macOS terminal written in Swift and AppKit.
+<img src="moth-readme-cropped.png" alt="Moth — A native macOS terminal" width="768">
 
 [Website](https://getmoth.dev) · [Documentation](https://getmoth.dev/docs/)
 
