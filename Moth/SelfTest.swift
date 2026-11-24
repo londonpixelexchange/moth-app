@@ -889,7 +889,25 @@ enum SelfTest {
         var ascending = KeyboardNoteSequence()
         checks["ascendingPatternWalksScaleAndWraps"] = (0..<8).map { _ in ascending.next(phrase) } == [66,67,69,71,72,74,76,66]
         phrase.pattern = "descending"; var descending = KeyboardNoteSequence()
-        checks["descendingPatternWalksScaleAndWraps"] = (0..<8).map { _ in descending.next(phrase) } == [76,74,72,71,69,67,66,76]
+        checks["descendingPatternWalksScaleAndWraps"] = (0..<9).map { _ in descending.next(phrase) } == [78,76,74,72,71,69,67,66,78]
+        var descendingPhrase = phrase; descendingPhrase.key = "C"; descendingPhrase.mode = "ionian"
+        var ionianDescending = KeyboardNoteSequence()
+        checks["descendingIonianRunsTonicToTonic"] = (0..<9).map { _ in ionianDescending.next(descendingPhrase) } == [72,71,69,67,65,64,62,60,72]
+        descendingPhrase.mode = "locrian"
+        checks["changingDescendingModeRestartsAtUpperTonic"] = ionianDescending.next(descendingPhrase) == 72
+        var locrianDescending = KeyboardNoteSequence()
+        checks["descendingLocrianRunsTonicToTonic"] = (0..<9).map { _ in locrianDescending.next(descendingPhrase) } == [72,70,68,66,65,63,61,60,72]
+        var allDescending = true
+        for key in Configuration.musicalKeys {
+            for mode in Configuration.musicalModes {
+                descendingPhrase.key = key; descendingPhrase.mode = mode.0
+                var sequence = KeyboardNoteSequence()
+                let root = 60+Configuration.musicalKeys.firstIndex(of:key)!
+                let expected = [root+12]+mode.1.reversed().map { root+$0 }
+                allDescending = (0..<64).allSatisfy { sequence.next(descendingPhrase) == expected[$0 % 8] } && allDescending
+            }
+        }
+        checks["descendingAllKeysAndModesRepeatCompleteOctaves"] = allDescending
         phrase.pattern = "arpeggiating"; var arpeggio = KeyboardNoteSequence()
         checks["arpeggioUsesModalChordTonesAndReturns"] = (0..<7).map { _ in arpeggio.next(phrase) } == [66,69,72,76,72,69,66]
         phrase.pattern = "random"; var random = KeyboardNoteSequence()
@@ -1286,7 +1304,7 @@ enum SelfTest {
         if !missing.isEmpty { print("Settings missing fields:",missing.sorted()) }
         checks["nativeFontAndTextColourPickersExist"] = picker.fields["fontName"] is NSButton && picker.fields["palette.foreground"] is NSColorWell && picker.fields["cursor.shape"] is NSPopUpButton
         let about = AboutWindowController()
-        checks["aboutWindowIncludesRequestedThanks"] = about.thanksText.stringValue == "Pedro Ortiz Suarez\nDevon Dugentas\nThijs Dalhuijsen\nMalte Ostendorff\nMike Abbey" && about.versionText.stringValue.contains(Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "Version")
+        checks["aboutWindowIncludesRequestedThanks"] = about.thanksText.stringValue == "Pedro Ortiz Suarez\nDevon Dugentas\nThijs Dalhuijsen\nMalte Ostendorff\nMike Abbey\nPaul Bernicchi" && about.versionText.stringValue.contains(Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "Version")
         checks["openSourceNoticesAreBundled"] = Bundle.main.url(forResource:"THIRD-PARTY-NOTICES",withExtension:nil).flatMap { try? String(contentsOf:$0) }.map { $0.contains("Miguel de Icaza") && $0.contains("Jeff Lebrun") && $0.contains("Mark Gillard") } == true
         let saved = app.config
         app.config.background.style = "solid"; app.config.background.effectColors = ["112233","445566"]; app.config.background.speed = 2; app.config.background.intensity = 0.9

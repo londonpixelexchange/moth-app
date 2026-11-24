@@ -1,5 +1,24 @@
 [
   {
+    "version": "0.27.7",
+    "build": 67,
+    "status": "released",
+    "sections": [
+      {
+        "title": "Fixed",
+        "items": [
+          "There was an oboe (off-by-one error) in the Keyboard Sounds modes causing descending scales to start and end on the seventh degree instead of the tonic. Descending scales now run from the upper tonic to the lower tonic."
+        ]
+      },
+      {
+        "title": "Acknowledgements",
+        "items": [
+          "Added Paul Bernicchi to Thanks."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.6",
     "build": 66,
     "status": "released",

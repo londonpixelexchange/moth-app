@@ -17,12 +17,13 @@ struct KeyboardNoteSequence {
         let index: Int
         switch config.pattern {
         case "ascending": index = step % 7
-        case "descending": index = 6-step % 7
+        case "descending": index = 7-step % 8
         case "arpeggiating": index = [0,2,4,6,4,2][step % 6]
         default: index = max(0,min(6,randomIndex()))
         }
-        step = (step+1) % 42
-        return notes[index]
+        step = (step+1) % (config.pattern == "descending" ? 8 : 42)
+        // Descending phrases include the upper tonic before the seven scale notes.
+        return index == 7 ? notes[0]+12 : notes[index]
     }
 }
 
