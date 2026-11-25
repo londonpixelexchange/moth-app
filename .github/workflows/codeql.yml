@@ -32,8 +32,8 @@ jobs:
       - name: Build for analysis
         run: |
           xcodebuild -project Moth.xcodeproj -scheme Moth -configuration Release \
-            -destination 'platform=macOS,arch=arm64' -derivedDataPath Build/CodeQL \
-            build ARCHS=arm64 CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
+            -destination 'generic/platform=macOS' -derivedDataPath Build/CodeQL \
+            build ARCHS="$(uname -m)" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
             COMPILATION_CACHE_ENABLE_CACHING=NO SWIFT_ENABLE_COMPILE_CACHE=NO \
             SWIFT_USE_INTEGRATED_DRIVER=NO
       - uses: github/codeql-action/analyze@915412ff23e8b7659517e607487dbeae018f2934 # v4
