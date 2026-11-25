@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   analyze:
-    name: CodeQL analysis
+    name: CodeQL compiled code
     runs-on: macos-26
     timeout-minutes: 35
     permissions:
@@ -27,7 +27,7 @@ jobs:
         run: echo "DEVELOPER_DIR=$(xcode-select -p)" >> "$GITHUB_ENV"
       - uses: github/codeql-action/init@915412ff23e8b7659517e607487dbeae018f2934 # v4
         with:
-          languages: c-cpp, python, swift
+          languages: c-cpp, swift
           build-mode: manual
       - name: Build for analysis
         run: |
@@ -36,4 +36,20 @@ jobs:
             build ARCHS=arm64 CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
             COMPILATION_CACHE_ENABLE_CACHING=NO SWIFT_ENABLE_COMPILE_CACHE=NO \
             SWIFT_USE_INTEGRATED_DRIVER=NO
+      - uses: github/codeql-action/analyze@915412ff23e8b7659517e607487dbeae018f2934 # v4
+  python:
+    name: CodeQL Python
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@915412ff23e8b7659517e607487dbeae018f2934 # v4
+        with:
+          languages: python
+          build-mode: none
       - uses: github/codeql-action/analyze@915412ff23e8b7659517e607487dbeae018f2934 # v4
