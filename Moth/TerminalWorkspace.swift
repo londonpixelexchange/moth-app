@@ -84,7 +84,24 @@ class ShellView: LocalProcessTerminalView {
     }
     override var acceptsFirstResponder: Bool { !readOnly && super.acceptsFirstResponder }
     var keyboardSound = Configuration.KeyboardSound()
+    private func isDefinitionShortcut(_ event: NSEvent) -> Bool {
+        event.modifierFlags.intersection([.command,.control,.option,.shift]) == [.command,.control] && event.charactersIgnoringModifiers?.lowercased() == "d"
+    }
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        if window?.firstResponder === self,isDefinitionShortcut(event) { lookUpSelection(nil); return true }
+        return super.performKeyEquivalent(with:event)
+    }
+    override func quickLook(with event: NSEvent) {
+        presentDefinition(at:convert(event.locationInWindow,from:nil))
+    }
+    @objc func lookUpSelection(_ sender: Any?) { presentDefinition() }
+    private func presentDefinition(at point: NSPoint? = nil) {
+        guard let target = definitionTarget(at:point) else { return }
+        showDefinition(for:target.text,at:target.baselineOrigin)
+    }
     override func keyDown(with event: NSEvent) {
+        // Handle Look Up before SwiftTerm clears the selection or encodes Control-D.
+        if isDefinitionShortcut(event) { lookUpSelection(nil); return }
         guard !readOnly else { return }
         if KeyboardSoundPlayer.shouldPlay(event) { KeyboardSoundPlayer.shared.play(keyboardSound) }
         userInputDepth += 1; defer { userInputDepth -= 1 }
@@ -163,6 +180,9 @@ class ShellView: LocalProcessTerminalView {
             add("Open Link",#selector(openContextLink(_:)),value:link.link)
             add("Copy Link",#selector(copyContextLink(_:)),value:link.link); menu.addItem(.separator())
         }
+        let definition = definitionTarget(at:convert(event.locationInWindow,from:nil))
+        add("Look Up",#selector(lookUpSelection(_:)),enabled:definition != nil)
+        menu.addItem(.separator())
         add("Copy",#selector(copy(_:)),enabled:!(getSelection() ?? "").isEmpty)
         add("Paste",#selector(paste(_:)),enabled:!readOnly && NSPasteboard.general.string(forType:.string) != nil)
         add("Select All",#selector(selectAll(_:))); menu.addItem(.separator())

@@ -133,6 +133,7 @@ enum SelfTest {
         checks["textRunsStayOnGrid"] = textRunsStayOnGrid()
         checks["boxDrawingUsesSameGridAsText"] = boxDrawingUsesSameGridAsText()
         fileDropChecks(into: &checks)
+        definitionChecks(into: &checks)
         alternateHistoryChecks(into: &checks)
         wheelChecks(into: &checks)
         appearanceFeatureChecks(app: app, into: &checks)
@@ -1930,6 +1931,31 @@ enum SelfTest {
         let actual = Double(pixels.reduce(0, +))/Double(pixels.count)
         return abs(actual - expected) < 2
     }
+    static func definitionChecks(into checks: inout [String: Bool]) {
+        let terminal = DefinitionCaptureView(frame:NSRect(x:0,y:0,width:600,height:200))
+        terminal.feed(text:"hello world")
+        let match = terminal.getTerminal().find("hello").matches.first!
+        _ = terminal.revealSearchMatch(match)
+        let target = terminal.definitionTarget()
+        checks["definitionUsesSelectedText"] = target?.text.string == "hello" && terminal.bounds.contains(target!.baselineOrigin)
+        let event = NSEvent.keyEvent(with:.keyDown,location:.zero,modifierFlags:[.command,.control],timestamp:0,windowNumber:0,context:nil,characters:"d",charactersIgnoringModifiers:"d",isARepeat:false,keyCode:2)!
+        terminal.keyDown(with:event)
+        checks["definitionShortcutPreservesSelectionAndPTY"] = terminal.definitions == ["hello"] && terminal.getSelection() == "hello" && terminal.sent.isEmpty
+        terminal.readOnly = true; terminal.keyDown(with:event)
+        checks["definitionWorksInReadOnlyTerminal"] = terminal.definitions == ["hello","hello"] && terminal.sent.isEmpty
+        terminal.selectNone()
+        checks["definitionWithoutSelectionIsEmpty"] = terminal.definitionTarget() == nil
+        if let origin = target?.baselineOrigin {
+            let point = NSPoint(x:origin.x+1,y:origin.y+1)
+            let click = NSEvent.mouseEvent(with:.rightMouseDown,location:point,modifierFlags:[],timestamp:0,windowNumber:0,context:nil,eventNumber:0,clickCount:1,pressure:0)!
+            let menu = terminal.menu(for:click)
+            let lookup = menu?.items.first { $0.action == #selector(ShellView.lookUpSelection(_:)) }
+            checks["definitionContextMenuSelectsWord"] = lookup?.isEnabled == true && terminal.getSelection() == "hello"
+            terminal.quickLook(with:click)
+            checks["definitionGestureUsesNativePresentation"] = terminal.definitions.last == "hello" && terminal.sent.isEmpty
+        }
+    }
+
     static func fileDropChecks(into checks: inout [String: Bool]) {
         let board = NSPasteboard.withUniqueName()
         defer { board.releaseGlobally() }
@@ -3239,4 +3265,13 @@ private final class MetalPresentationChecks {
         }
         DispatchQueue.main.asyncAfter(deadline:.now()+12){ [self] in checks["metalPresentationCompletedBeforeTimeout"]=false;finish() }
     }
+}
+
+private final class DefinitionCaptureView: ShellView {
+    var definitions: [String] = []
+    var sent: [UInt8] = []
+    override func showDefinition(for attrString: NSAttributedString?, at textBaselineOrigin: NSPoint) {
+        definitions.append(attrString?.string ?? "")
+    }
+    override func send(source: TerminalView, data: ArraySlice<UInt8>) { sent.append(contentsOf:data) }
 }

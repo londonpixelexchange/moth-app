@@ -1066,6 +1066,35 @@ open class TerminalView: NSView, NSTextInputClient, NSUserInterfaceValidations, 
         return terminal.encodeButton(button: event.buttonNumber, release: isReleaseEvent, shift: flags.contains(.shift), meta: flags.contains(.option), control: flags.contains(.control))
     }
     
+    /// Resolve selected text (or the word under a contextual click) and its native
+    /// definition-popover anchor without sending mouse or keyboard input to the PTY.
+    public func definitionTarget(at point: CGPoint? = nil) -> (text: NSAttributedString, baselineOrigin: CGPoint)? {
+        guard let cellDimension else { return nil }
+        let buffer = terminal.displayBuffer
+        func orderedSelection() -> (Position, Position) {
+            Position.compare(selection.start,selection.end) == .after ? (selection.end,selection.start) : (selection.start,selection.end)
+        }
+        if let point {
+            guard bounds.contains(point),point.x < CGFloat(terminal.cols)*cellDimension.width else { return nil }
+            let hit = calculateMouseHit(at:point).grid
+            let (start,end) = orderedSelection()
+            let inside = selection.active && Position.compare(hit,start) != .before && Position.compare(hit,end) == .before
+            if !inside {
+                let character = terminal.getCharacter(for:buffer.lines[hit.row][hit.col])
+                guard character != "\0",!String(character).trimmingCharacters(in:.whitespacesAndNewlines).isEmpty else { return nil }
+                selection.selectWordOrExpression(at:hit,in:buffer)
+                needsDisplay = true
+            }
+        }
+        guard let text = getSelection(),!text.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty else { return nil }
+        let (start,_) = orderedSelection()
+        guard start.row >= buffer.yDisp,start.row < buffer.yDisp+terminal.rows,start.row < buffer.lines.count else { return nil }
+        let scale: CGFloat = buffer.lines[start.row].renderMode == .single ? 1 : 2
+        let origin = CGPoint(x:CGFloat(start.col)*cellDimension.width*scale,
+                             y:bounds.height-CGFloat(start.row-buffer.yDisp+1)*cellDimension.height-font.descender)
+        return (NSAttributedString(string:text,attributes:[.font:font]),origin)
+    }
+
     func calculateMouseHit (with event: NSEvent) -> (grid: Position, pixels: Position)
     {
         let point = convert(event.locationInWindow, from: nil)

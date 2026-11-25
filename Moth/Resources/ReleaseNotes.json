@@ -1,5 +1,18 @@
 [
   {
+    "version": "0.27.8",
+    "build": 68,
+    "status": "released",
+    "sections": [
+      {
+        "title": "Added",
+        "items": [
+          "Look up word definitions in the native macOS popover by selecting text and pressing Control+Command+D, choosing Look Up from the terminal context menu, or using the Look Up trackpad gesture."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.7",
     "build": 67,
     "status": "released",
