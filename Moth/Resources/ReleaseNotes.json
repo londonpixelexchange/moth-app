@@ -1,5 +1,26 @@
 [
   {
+    "version": "0.28.1",
+    "build": 70,
+    "status": "released",
+    "sections": [
+      {
+        "title": "Fixed",
+        "items": [
+          "Mouse motion reporting now distinguishes hovering, dragging and button releases correctly, fixing unwanted selections in mouse-aware terminal programs. Thanks to Finn Roach for the fix.",
+          "Held letters repeat by default instead of invoking macOS press-and-hold accent selection."
+        ]
+      },
+      {
+        "title": "Improved",
+        "items": [
+          "Faster rendering of truecolour block animations, including Gloam, with bounded colour caches during long sessions.",
+          "Finn Roach has been added to Thanks."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.28.0",
     "build": 69,
     "status": "released",

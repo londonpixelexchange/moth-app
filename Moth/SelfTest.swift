@@ -15,6 +15,18 @@ import Metal
 enum SelfTest {
     static func run(app: App) {
         setbuf(stdout,nil)
+        if CommandLine.arguments.contains("--gloam-only") { LiveAnimationChecks(app).run();return }
+        if CommandLine.arguments.contains("--animation-only") { AnimatedColourChecks.run(app);return }
+        if CommandLine.arguments.contains("--keyboard-only") {
+            var checks: [String:Bool] = [:];keyboardInputChecks(into:&checks)
+            HeldKeyPTYChecks.run(app) { live in
+                checks.merge(live) { _,new in new }
+                let output = ProcessInfo.processInfo.environment["MOTH_TEST_RESULT"]!
+                try! JSONSerialization.data(withJSONObject:checks,options:[.prettyPrinted,.sortedKeys]).write(to:URL(fileURLWithPath:output))
+                print(checks);app.windows.forEach { $0.stop() };exit(checks.values.allSatisfy { $0 } ? 0:1)
+            }
+            return
+        }
         if CommandLine.arguments.contains("--resize-only") { ResizeWindowChecks(app).run();return }
         if CommandLine.arguments.contains("--manuals-only") { ManualViewerChecks(app).run();return }
         if CommandLine.arguments.contains("--metal-only") { MetalPresentationChecks(app).run();return }
@@ -833,6 +845,21 @@ enum SelfTest {
             terminal.keyDown(with:event)
             return recorder.finish().keys.joined()
         }
+        func held(_ characters: String, code: UInt16, flags: NSEvent.ModifierFlags = [], expected: String) -> Bool {
+            terminal.optionAsMetaKey = false;recorder.start(terminal)
+            for index in 0..<12 {
+                let event = NSEvent.keyEvent(with:.keyDown,location:.zero,modifierFlags:flags,timestamp:Double(index)/30,windowNumber:0,context:nil,characters:characters,charactersIgnoringModifiers:characters,isARepeat:index > 0,keyCode:code)!
+                terminal.keyDown(with:event)
+            }
+            return recorder.finish().keys.joined() == String(repeating:expected,count:12)
+        }
+        checks["terminalDefaultsToKeyRepeat"] = !UserDefaults.standard.bool(forKey:"ApplePressAndHoldEnabled")
+        checks["heldLetterDeliversEveryRepeat"] = held("a",code:0,expected:"a")
+        checks["heldShiftLetterDeliversEveryRepeat"] = held("A",code:0,flags:.shift,expected:"A")
+        checks["heldSpaceDeliversEveryRepeat"] = held(" ",code:49,expected:" ")
+        checks["heldBackspaceDeliversEveryRepeat"] = held("\u{7f}",code:51,expected:"\u{7f}")
+        checks["heldArrowDeliversEveryRepeat"] = held("\u{f703}",code:124,flags:[.function,.numericPad],expected:"\u{1b}[C")
+        checks["heldControlKeyDeliversEveryRepeat"] = held("d",code:2,flags:.control,expected:"\u{4}")
         checks["nativeOptionTypingIsDefault"] = !defaults.optionAsMeta && !pane.terminal.optionAsMetaKey
         checks["britishOptionThreeSendsHash"] = input("#",raw:"3",meta:false) == "#"
         checks["nativeOptionTypingPreservesLayoutCharacters"] = input("€",raw:"2",meta:false) == "€"
@@ -1308,7 +1335,7 @@ enum SelfTest {
         if !missing.isEmpty { print("Settings missing fields:",missing.sorted()) }
         checks["nativeFontAndTextColourPickersExist"] = picker.fields["fontName"] is NSButton && picker.fields["palette.foreground"] is NSColorWell && picker.fields["cursor.shape"] is NSPopUpButton
         let about = AboutWindowController()
-        checks["aboutWindowIncludesRequestedThanks"] = about.thanksText.stringValue == "Pedro Ortiz Suarez\nDevon Dugentas\nThijs Dalhuijsen\nMalte Ostendorff\nMike Abbey\nPaul Bernicchi" && about.versionText.stringValue.contains(Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "Version")
+        checks["aboutWindowIncludesRequestedThanks"] = about.thanksText.stringValue == "Pedro Ortiz Suarez\nDevon Dugentas\nThijs Dalhuijsen\nMalte Ostendorff\nMike Abbey\nPaul Bernicchi\nFinn Roach" && about.versionText.stringValue.contains(Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "Version")
         checks["openSourceNoticesAreBundled"] = Bundle.main.url(forResource:"THIRD-PARTY-NOTICES",withExtension:nil).flatMap { try? String(contentsOf:$0) }.map { $0.contains("Miguel de Icaza") && $0.contains("Jeff Lebrun") && $0.contains("Mark Gillard") } == true
         let saved = app.config
         app.config.background.style = "solid"; app.config.background.effectColors = ["112233","445566"]; app.config.background.speed = 2; app.config.background.intensity = 0.9
@@ -3471,5 +3498,146 @@ private final class ResizeWindowChecks {
         try! JSONSerialization.data(withJSONObject:checks,options:[.prettyPrinted,.sortedKeys]).write(to:path)
         try! JSONSerialization.data(withJSONObject:measurements,options:[.prettyPrinted,.sortedKeys]).write(to:path.deletingLastPathComponent().appendingPathComponent("ResizeMeasurements.json"))
         app.windows.forEach { $0.stop() };NSApp.terminate(nil)
+    }
+}
+
+
+/// Same per-cell truecolour/upper-half-block workload as Gloam, with deterministic
+/// frames and no network/audio decoding included in the terminal measurement.
+private enum AnimatedColourChecks {
+    static func run(_ app: App) {
+        guard let host = app.active else { exit(1) }
+        var config = Configuration();config.background.style = "solid";config.cursor.animation = "noblink"
+        app.config = config;app.applyAppearance()
+        let terminal = host.workspace.active.terminal
+        host.window?.setContentSize(NSSize(width:1200,height:800));host.content.layoutSubtreeIfNeeded()
+        terminal.getTerminal().resetFromHost()
+        terminal.feed(text:"\u{1b}[?1049h\u{1b}[?25l")
+        let core = terminal.getTerminal(),cols = core.cols,rows = core.rows-1
+        let scale = host.window!.backingScaleFactor,size = terminal.bounds.size
+        let bitmap = NSBitmapImageRep(bitmapDataPlanes:nil,pixelsWide:Int(size.width*scale),pixelsHigh:Int(size.height*scale),bitsPerSample:8,samplesPerPixel:4,hasAlpha:true,isPlanar:false,colorSpaceName:.deviceRGB,bytesPerRow:0,bitsPerPixel:0)!
+        let context = NSGraphicsContext(bitmapImageRep:bitmap)!
+        var feedSamples: [Double] = [],drawSamples: [Double] = []
+        let frameCount = 120
+        func frame(_ index: Int) {
+            var text = "\u{1b}[H"
+            for row in 0..<rows {
+                for col in 0..<cols {
+                    let n = index*7919+row*cols+col,r = n%256,g = (n/256)%256,b = (n*13)%256
+                    text += "\u{1b}[38;2;\(r);\(g);\(b)m\u{1b}[48;2;\((r+47)%256);\((g+101)%256);\((b+19)%256)m▀"
+                }
+                text += "\u{1b}[0m\r\n"
+            }
+            text += "\u{1b}[0mframe \(index)\u{1b}[K"
+            let start = ProcessInfo.processInfo.systemUptime
+            terminal.feed(text:text)
+            let fed = ProcessInfo.processInfo.systemUptime
+            NSGraphicsContext.saveGraphicsState();NSGraphicsContext.current = context
+            context.cgContext.saveGState();context.cgContext.scaleBy(x:scale,y:scale)
+            terminal.draw(terminal.bounds)
+            context.cgContext.restoreGState();NSGraphicsContext.restoreGraphicsState()
+            if index >= 10 { feedSamples.append((fed-start)*1000);drawSamples.append((ProcessInfo.processInfo.systemUptime-fed)*1000) }
+            if index+1 < frameCount { DispatchQueue.main.async { frame(index+1) };return }
+            func stats(_ samples: [Double]) -> [String:Double] {
+                let sorted = samples.sorted()
+                return ["meanMilliseconds":samples.reduce(0,+)/Double(samples.count),"p95Milliseconds":sorted[Int(Double(sorted.count-1)*0.95)]]
+            }
+            let output = URL(fileURLWithPath:ProcessInfo.processInfo.environment["MOTH_TEST_RESULT"]!)
+            let measures: [String:Any] = ["cols":cols,"rows":rows,"frames":frameCount,"feed":stats(feedSamples),"draw":stats(drawSamples)]
+            try! JSONSerialization.data(withJSONObject:measures,options:[.prettyPrinted,.sortedKeys]).write(to:output.deletingLastPathComponent().appendingPathComponent("AnimationMeasurements.json"))
+            try! bitmap.representation(using:.png,properties:[:])!.write(to:output.deletingLastPathComponent().appendingPathComponent("Animation.png"))
+            let checks = ["animationReachedLastFrame":core.exportPlainText().contains("frame \(frameCount-1)"),"animationGridSizePreserved":core.cols == cols && core.rows == rows+1]
+            try! JSONSerialization.data(withJSONObject:checks,options:[.prettyPrinted,.sortedKeys]).write(to:output)
+            print("ANIMATION_BENCH",measures)
+            app.windows.forEach { $0.stop() };exit(checks.values.allSatisfy { $0 } ? 0:1)
+        }
+        DispatchQueue.main.asyncAfter(deadline:.now()+0.3) { frame(0) }
+    }
+}
+
+
+/// Optional local-program probe: exercise the ordinary PTY and on-screen draw
+/// path while measuring how promptly the main run loop can service input.
+private final class LiveAnimationChecks {
+    let app: App
+    var ticks: [Double] = []
+    var timer: Timer?
+    var lastTick = ProcessInfo.processInfo.systemUptime
+    var checks: [String:Bool] = [:]
+    init(_ app: App) { self.app = app }
+    func run() {
+        guard let command = ProcessInfo.processInfo.environment["MOTH_TEST_ANIMATION_COMMAND"],let host = app.active else { exit(2) }
+        var config = Configuration();config.background.style = "solid";config.cursor.animation = "noblink"
+        app.config = config;app.applyAppearance()
+        host.window?.setContentSize(NSSize(width:1200,height:800));host.content.layoutSubtreeIfNeeded()
+        let terminal = host.workspace.active.terminal
+        terminal.sendUserText("stty -echo; \(ShellView.quotePath(command)); printf '\\nMOTH_ANIMATION_EXIT:%s\\n' \"$?\"\r")
+        func waitFor(_ predicate: @escaping ()->Bool, _ remaining: Int, _ done: @escaping (Bool)->Void) {
+            if predicate() { done(true);return }
+            if remaining == 0 { done(false);return }
+            DispatchQueue.main.asyncAfter(deadline:.now()+0.05) { waitFor(predicate,remaining-1,done) }
+        }
+        waitFor({ terminal.getTerminal().isCurrentBufferAlternate },200) { ready in
+            self.checks["liveAnimationEnteredAlternateScreen"] = ready
+            guard ready else { self.finish();return }
+            self.lastTick = ProcessInfo.processInfo.systemUptime
+            self.timer = Timer.scheduledTimer(withTimeInterval:1.0/30,repeats:true) { _ in
+                let now = ProcessInfo.processInfo.systemUptime
+                self.ticks.append((now-self.lastTick)*1000);self.lastTick = now
+            }
+            DispatchQueue.main.asyncAfter(deadline:.now()+10) {
+                self.timer?.invalidate();self.timer = nil
+                if let bitmap = terminal.bitmapImageRepForCachingDisplay(in:terminal.bounds) {
+                    terminal.cacheDisplay(in:terminal.bounds,to:bitmap)
+                    let output = URL(fileURLWithPath:ProcessInfo.processInfo.environment["MOTH_TEST_RESULT"]!).deletingLastPathComponent()
+                    try? bitmap.representation(using:.png,properties:[:])?.write(to:output.appendingPathComponent("LiveAnimation.png"))
+                }
+                terminal.sendUserText("q")
+                waitFor({ !terminal.getTerminal().isCurrentBufferAlternate && terminal.getTerminal().exportPlainText().contains("MOTH_ANIMATION_EXIT:0") },200) { exited in
+                    self.checks["liveAnimationRespondsToQuitAndRestoresShell"] = exited;self.finish()
+                }
+            }
+        }
+    }
+    func finish() {
+        let output = URL(fileURLWithPath:ProcessInfo.processInfo.environment["MOTH_TEST_RESULT"]!)
+        let sorted = ticks.sorted()
+        let metrics: [String:Any] = ["ticks":ticks.count,"meanIntervalMilliseconds":ticks.isEmpty ? 0:ticks.reduce(0,+)/Double(ticks.count),"p95IntervalMilliseconds":sorted.isEmpty ? 0:sorted[Int(Double(sorted.count-1)*0.95)],"maximumIntervalMilliseconds":sorted.last ?? 0]
+        try! JSONSerialization.data(withJSONObject:metrics,options:[.prettyPrinted,.sortedKeys]).write(to:output.deletingLastPathComponent().appendingPathComponent("LiveAnimationMeasurements.json"))
+        try! JSONSerialization.data(withJSONObject:checks,options:[.prettyPrinted,.sortedKeys]).write(to:output)
+        print("LIVE_ANIMATION",metrics,checks)
+        app.windows.forEach { $0.stop() };exit(checks.values.allSatisfy { $0 } ? 0:1)
+    }
+}
+
+
+private enum HeldKeyPTYChecks {
+    static func run(_ app: App, done: @escaping ([String:Bool])->Void) {
+        guard let terminal = app.active?.workspace.active.terminal else { done(["heldKeysReachPTY":false]);return }
+        let cases: [(String,UInt16,NSEvent.ModifierFlags,String)] = [
+            ("a",0,[],"a"),("A",0,.shift,"A"),(" ",49,[]," "),
+            ("\u{7f}",51,[],"\u{7f}"),("\u{f703}",124,[.function,.numericPad],"\u{1b}[C"),("d",2,.control,"\u{4}")]
+        let expected = cases.map { String(repeating:$0.3,count:12) }.joined()
+        let hex = expected.utf8.map { String(format:"%02x",$0) }.joined()
+        terminal.sendUserText("stty -echo -icanon min 1 time 0; printf '\\033[?1l\\nMOTH_HELD_%s\\n' READY; /usr/bin/od -An -v -tx1 -N\(expected.utf8.count); stty echo icanon; printf '\\nMOTH_HELD_%s\\n' DONE\r")
+        func wait(_ marker: String, _ remaining: Int, _ completion: @escaping (Bool)->Void) {
+            if terminal.getTerminal().exportPlainText().components(separatedBy:"\n").contains(marker) { completion(true);return }
+            guard remaining > 0 else { completion(false);return }
+            DispatchQueue.main.asyncAfter(deadline:.now()+0.05) { wait(marker,remaining-1,completion) }
+        }
+        wait("MOTH_HELD_READY",120) { ready in
+            guard ready else { print("HELD_KEY_PTY_NOT_READY",terminal.getTerminal().exportPlainText());done(["heldKeysReachPTY":false]);return }
+            for (characters,code,flags,_) in cases {
+                for index in 0..<12 {
+                    let event = NSEvent.keyEvent(with:.keyDown,location:.zero,modifierFlags:flags,timestamp:Double(index)/30,windowNumber:terminal.window!.windowNumber,context:nil,characters:characters,charactersIgnoringModifiers:characters,isARepeat:index > 0,keyCode:code)!
+                    terminal.keyDown(with:event)
+                }
+            }
+            wait("MOTH_HELD_DONE",120) { complete in
+                let output = terminal.getTerminal().exportPlainText().components(separatedBy:.whitespacesAndNewlines).joined()
+                if !complete || !output.contains(hex) { print("HELD_KEY_PTY",complete,"expected",hex,"actual",output) }
+                done(["heldKeysReachPTY":complete && output.contains(hex)])
+            }
+        }
     }
 }

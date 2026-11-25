@@ -15,3 +15,12 @@ notarisation credentials are never available to pull requests.
 
 GitHub Actions dependencies are pinned to commit SHAs and updated by Dependabot.
 See [SECURITY.md](SECURITY.md) for private vulnerability reporting.
+
+For input and animation changes, `./test-app.sh --keyboard-only` checks held-key
+handling through AppKit and a real PTY. `./test-app.sh --animation-only` measures
+deterministic truecolour block frames and saves `AnimationMeasurements.json` and
+a frame image next to the test result. These timings measure parsing and bitmap
+drawing separately, not overall application frame rate. For a locally installed
+interactive animation, set `MOTH_TEST_ANIMATION_COMMAND` to an executable wrapper
+and run `./test-app.sh --gloam-only`; the probe runs it for ten seconds, sends `q`,
+and checks that the shell is restored. Use a silent local audio file for Gloam.
