@@ -1,5 +1,40 @@
 [
   {
+    "version": "0.28.0",
+    "build": 69,
+    "status": "released",
+    "sections": [
+      {
+        "title": "Added",
+        "items": [
+          "Read installed system and Homebrew man pages inside Moth, with search, clickable SEE ALSO links, and back/forward navigation.",
+          "Open a command’s manual by Command-clicking its name, choosing Open Manual Page from the context menu, or selecting it and pressing Control+Command+M. The shortcut is configurable.",
+          "Keep manuals in a popover or open them in a separate, resizable reference window.",
+          "Choose Off, Word definition, or Manual page for force-click and Look Up gestures in Settings → Look Up & Manuals. Command-click manual lookup can also be switched off."
+        ]
+      },
+      {
+        "title": "Improved",
+        "items": [
+          "Window resizing avoids allocating and resizing unused scrollback rows, reducing unnecessary work while preserving text reflow and selections."
+        ]
+      }
+    ]
+  },
+  {
+    "version": "0.27.8",
+    "build": 68,
+    "status": "released",
+    "sections": [
+      {
+        "title": "Added",
+        "items": [
+          "Look up word definitions in the native macOS popover by selecting text and pressing Control+Command+D, choosing Look Up from the terminal context menu, or using the Look Up trackpad gesture."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.27.7",
     "build": 67,
     "status": "released",

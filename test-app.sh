@@ -18,7 +18,7 @@ mkdir -p "$MOTH_VALIDATION_ROOT/results"
 MOTH_LAUNCHED_RESULT="$MOTH_VALIDATION_ROOT/results/TestResults.json"
 touch "$MOTH_VALIDATION_ROOT/started"
 # Use the same macOS launch path as a user opening the app, including foreground activation.
-/usr/bin/open -n -W "$MOTH_VALIDATION_APP" --stdout "$MOTH_VALIDATION_ROOT/stdout.log" --stderr "$MOTH_VALIDATION_ROOT/stderr.log" --env "MOTH_TEST_RESULT=$MOTH_LAUNCHED_RESULT" --args --self-test "$@"
+/usr/bin/open -n -W "$MOTH_VALIDATION_APP" --stdout "$MOTH_VALIDATION_ROOT/stdout.log" --stderr "$MOTH_VALIDATION_ROOT/stderr.log" --env "MOTH_TEST_RESULT=$MOTH_LAUNCHED_RESULT" --env "MOTH_CONFIG_PATH=$MOTH_VALIDATION_ROOT/config.toml" --args --self-test "$@"
 cat "$MOTH_VALIDATION_ROOT/stdout.log" "$MOTH_VALIDATION_ROOT/stderr.log"
 if [[ -s "$MOTH_LAUNCHED_RESULT" ]]; then
   cp "$MOTH_VALIDATION_ROOT/results/"* "$(dirname "$MOTH_VALIDATION_RESULT")/"

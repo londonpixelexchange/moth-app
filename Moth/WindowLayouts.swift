@@ -6,9 +6,11 @@ import AppKit
 
 indirect enum SavedSplit: Codable {
     case pane
+    case manual(String) // Read-only compatibility with earlier local preview layouts.
     case split(vertical: Bool, fraction: Double, first: SavedSplit, second: SavedSplit)
-    var paneCount: Int { switch self { case .pane:return 1; case let .split(_,_,a,b):return a.paneCount+b.paneCount } }
+    var paneCount: Int { switch self { case .pane,.manual:return 1; case let .split(_,_,a,b):return a.paneCount+b.paneCount } }
     func validate(depth: Int = 0) throws {
+        if case .manual(let query) = self,ManualReference(query) == nil { throw Configuration.invalid("Invalid saved manual page.") }
         guard depth < Workspace.maximumPanes,paneCount <= Workspace.maximumPanes else { throw Configuration.invalid("A saved tab can contain up to nine panes.") }
         if case let .split(_,fraction,a,b) = self {
             guard fraction.isFinite,(0.05...0.95).contains(fraction) else { throw Configuration.invalid("Invalid saved divider position.") }
@@ -18,11 +20,33 @@ indirect enum SavedSplit: Codable {
     var minimumSize: NSSize {
         switch self {
         case .pane:return NSSize(width:200,height:130)
+        case .manual:return NSSize(width:260,height:230)
         case let .split(vertical,_,a,b):let x = a.minimumSize,y = b.minimumSize; return vertical ? NSSize(width:x.width+y.width+1,height:max(x.height,y.height)) : NSSize(width:max(x.width,y.width),height:x.height+y.height+1)
         }
     }
 }
-struct SavedTab: Codable { var root: SavedSplit; var activePane: Int; var sessions: [String]? = nil }
+struct SavedTab: Codable {
+    var root: SavedSplit
+    var activePane: Int
+    var sessions: [String]? = nil
+    func removingManualPanes() -> SavedTab? {
+        var index = 0, retained: [Int] = []
+        func prune(_ node: SavedSplit) -> SavedSplit? {
+            switch node {
+            case .pane:retained.append(index);index += 1;return .pane
+            case .manual:index += 1;return nil
+            case let .split(vertical,fraction,first,second):
+                let a = prune(first),b = prune(second)
+                if let a,let b { return .split(vertical:vertical,fraction:fraction,first:a,second:b) }
+                return a ?? b
+            }
+        }
+        guard let terminalRoot = prune(root) else { return nil }
+        let active = retained.firstIndex(of:activePane) ?? min(retained.filter{$0 < activePane}.count,retained.count-1)
+        let terminalSessions = sessions.map { ids in retained.compactMap { $0 < ids.count ? ids[$0] : nil } }
+        return SavedTab(root:terminalRoot,activePane:active,sessions:terminalSessions)
+    }
+}
 struct SavedWindowLayout: Codable, Identifiable {
     var id = UUID()
     var profileID: String? = nil

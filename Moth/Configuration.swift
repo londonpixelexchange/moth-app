@@ -265,6 +265,19 @@ struct Configuration: Codable {
             copyOnSelect = try c.decodeIfPresent(Bool.self,forKey:.copyOnSelect) ?? false
         }
     }
+    struct Lookup: Codable {
+        var forceClickAction = "definition"
+        var commandClickManual = true
+        var manualPresentation = "popover"
+        init() {}
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy:CodingKeys.self)
+            forceClickAction = try c.decodeIfPresent(String.self,forKey:.forceClickAction) ?? "definition"
+            commandClickManual = try c.decodeIfPresent(Bool.self,forKey:.commandClickManual) ?? true
+            manualPresentation = try c.decodeIfPresent(String.self,forKey:.manualPresentation) ?? "popover"
+            if manualPresentation == "split" { manualPresentation = "window" }
+        }
+    }
     struct Macro: Codable {
         var text = ""
         var keys: [String] = []
@@ -365,9 +378,10 @@ struct Configuration: Codable {
     var closeConfirmation = CloseConfirmation()
     var advanced = Advanced()
     var updates = Updates()
+    var lookup = Lookup()
     var macros: [String:Macro] = [:]
     static var defaultKeybindings: [String: String] {
-        var bindings = ["newWindow": "cmd+n", "newTab": "cmd+t", "splitRight": "cmd+d", "splitDown": "cmd+shift+d", "closePane": "cmd+w", "nextPane": "cmd+]", "toggleMaximizePane":"cmd+shift+return", "nextTab": "cmd+shift+]", "reloadConfig": "cmd+alt+r", "openLayouts": "cmd+shift+r", "resetTerminal": "cmd+r", "toggleKeyboardSounds": "cmd+alt+k"]
+        var bindings = ["newWindow": "cmd+n", "newTab": "cmd+t", "splitRight": "cmd+d", "splitDown": "cmd+shift+d", "closePane": "cmd+w", "nextPane": "cmd+]", "toggleMaximizePane":"cmd+shift+return", "nextTab": "cmd+shift+]", "reloadConfig": "cmd+alt+r", "openLayouts": "cmd+shift+r", "resetTerminal": "cmd+r", "toggleKeyboardSounds": "cmd+alt+k", "openManualPage":"cmd+ctrl+m"]
         for number in 1...9 { bindings["selectTab\(number)"] = "cmd+\(number)" }
         return bindings
     }
@@ -400,6 +414,7 @@ struct Configuration: Codable {
         closeConfirmation = try c.decodeIfPresent(CloseConfirmation.self, forKey: .closeConfirmation) ?? closeConfirmation
         advanced = try c.decodeIfPresent(Advanced.self,forKey:.advanced) ?? advanced
         updates = try c.decodeIfPresent(Updates.self,forKey:.updates) ?? updates
+        lookup = try c.decodeIfPresent(Lookup.self,forKey:.lookup) ?? lookup
         macros = try c.decodeIfPresent([String:Macro].self,forKey:.macros) ?? [:]
         let storedKeybindings=try c.decodeIfPresent([String:String].self,forKey:.keybindings)
         keybindings=storedKeybindings ?? keybindings
@@ -408,6 +423,11 @@ struct Configuration: Codable {
             if keybindings["reloadConfig"] == "cmd+shift+r" { keybindings["reloadConfig"] = "cmd+alt+r" }
             let occupied = keybindings.values.contains { value in guard let shortcut = Self.shortcut(value) else { return false }; return shortcut.0 == "r" && shortcut.1 == [.command,.shift] }
             keybindings["openLayouts"] = occupied ? "" : "cmd+shift+r"
+        }
+        if keybindings["openManualPage"] == nil {
+            let existing = Array(keybindings.values)+macros.values.map(\.shortcut)
+            let occupied = existing.contains { Self.shortcut($0).map { $0.0 == "m" && $0.1 == [.command,.control] } ?? false }
+            keybindings["openManualPage"] = occupied ? "" : "cmd+ctrl+m"
         }
         if keybindings["toggleKeyboardSounds"] == nil {
             let occupied = keybindings.values.contains { Self.shortcut($0).map { $0.0 == "k" && $0.1 == [.command,.option] } ?? false }
@@ -449,6 +469,7 @@ struct Configuration: Codable {
         return config
     }
     func validate() throws {
+        guard ["off","definition","manual"].contains(lookup.forceClickAction),["popover","window"].contains(lookup.manualPresentation) else { throw Self.invalid("Choose a valid force-click action and manual-page presentation.") }
         for path in [advanced.workingDirectory,advanced.logDirectory] where !path.isEmpty {
             var directory: ObjCBool = false
             guard path.hasPrefix("/"), FileManager.default.fileExists(atPath:path,isDirectory:&directory),directory.boolValue else { throw Self.invalid("Advanced directories must be existing absolute folder paths, or empty for defaults.") }
@@ -506,7 +527,7 @@ struct Configuration: Codable {
         }
     }
     static func invalid(_ text: String) -> Error { NSError(domain: "Moth", code: 1, userInfo: [NSLocalizedDescriptionKey: text]) }
-    static let actions = ["newWindow", "newTab", "splitRight", "splitDown", "closePane", "toggleMaximizePane", "nextPane", "nextTab", "reloadConfig", "resetTerminal", "openLayouts", "toggleKeyboardSounds"] + (1...9).map { "selectTab\($0)" }
+    static let actions = ["newWindow", "newTab", "splitRight", "splitDown", "closePane", "toggleMaximizePane", "nextPane", "nextTab", "reloadConfig", "resetTerminal", "openLayouts", "toggleKeyboardSounds", "openManualPage"] + (1...9).map { "selectTab\($0)" }
     static func shortcut(_ text: String) -> (String, NSEvent.ModifierFlags)? {
         let parts = text.lowercased().split(separator: "+").map(String.init)
         guard let rawKey = parts.last else { return nil }

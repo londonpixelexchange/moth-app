@@ -15,6 +15,13 @@ build)
  if ! git -C "$ROOT" diff --quiet HEAD -- || [ -n "$(git -C "$ROOT" ls-files --others --exclude-standard -- Moth Vendor scripts Moth.xcodeproj build.sh)" ]; then
   echo 'Commit tracked changes before creating a signed release.' >&2; exit 1
  fi
+ if [[ "$(git -C "$ROOT" branch --show-current)" != main ]]; then
+  echo 'Merge the release pull request and check out main before signing.' >&2; exit 1
+ fi
+ git -C "$ROOT" fetch origin main
+ if [[ "$(git -C "$ROOT" rev-parse HEAD)" != "$(git -C "$ROOT" rev-parse origin/main)" ]]; then
+  echo 'Release signing requires the exact merged origin/main commit. Fast-forward main first.' >&2; exit 1
+ fi
  mkdir -p "$RELEASE"
  "$DEVELOPER_DIR/usr/bin/xcodebuild" -project "$ROOT/Moth.xcodeproj" -scheme Moth -configuration Release \
   -destination 'platform=macOS,arch=arm64' -derivedDataPath "$ROOT/Build/SignedDerivedData" build \
