@@ -47,8 +47,8 @@ final class AppearancePanel: NSWindowController, NSTextFieldDelegate, NSTableVie
         profileSummary.stringValue = editingProfileID == nil ? "Default supplies settings for windows without a named profile. Create a profile from these settings, or select one above to edit it." : "Changes apply to windows using this profile. Shell and starting-directory changes apply to new sessions. Shortcuts, macros, close confirmations and diagnostic/clipboard options remain app-wide."
         configPath.stringValue = editingFile.path; configPath.toolTip = editingFile.path
     }
-    private let sections = ["Theme","Background","Font","Colours","Cursor","Window","Shell","Bell","Keyboard Sounds","Profiles","Macros","Shortcuts","Closing","Updates","Advanced"]
-    private let symbols = ["paintpalette","sparkles","textformat","slider.horizontal.3","character.cursor.ibeam","macwindow","terminal","bell","pianokeys","person.crop.rectangle.stack","record.circle","command","xmark.circle","arrow.triangle.2.circlepath","gearshape.2"]
+    private let sections = ["Theme","Background","Font","Colours","Cursor","Window","Shell","Bell","Keyboard Sounds","Profiles","Macros","Shortcuts","Look Up & Manuals","Closing","Updates","Advanced"]
+    private let symbols = ["paintpalette","sparkles","textformat","slider.horizontal.3","character.cursor.ibeam","macwindow","terminal","bell","pianokeys","person.crop.rectangle.stack","record.circle","command","book","xmark.circle","arrow.triangle.2.circlepath","gearshape.2"]
     private let subtitles = [
         "Theme":"Choose a starting palette, then make it your own.",
         "Background":"Choose a plain colour, moving colour field or your own picture.",
@@ -61,6 +61,7 @@ final class AppearancePanel: NSWindowController, NSTextFieldDelegate, NSTableVie
         "Keyboard Sounds":"A subtle accompaniment to your typing.",
         "Profiles":"Choose appearance and session defaults for each window.",
         "Shortcuts":"Make everyday actions easy to reach.",
+        "Look Up & Manuals":"Definitions and local command documentation, within reach.",
         "Closing":"Control when Moth asks before ending a session.",
         "Updates":"Check for new releases of Moth."
     ]
@@ -146,7 +147,7 @@ final class AppearancePanel: NSWindowController, NSTextFieldDelegate, NSTableVie
             pageTop,tabs.leadingAnchor.constraint(equalTo: sidebar.trailingAnchor,constant: 8),tabs.trailingAnchor.constraint(equalTo: root.trailingAnchor,constant: -8),tabs.bottomAnchor.constraint(equalTo: footer.topAnchor,constant: -12),
             footer.leadingAnchor.constraint(equalTo: sidebar.trailingAnchor,constant: 24),footer.trailingAnchor.constraint(equalTo: root.trailingAnchor,constant: -24),footer.bottomAnchor.constraint(equalTo: root.bottomAnchor,constant: -16),fileRow.widthAnchor.constraint(equalTo: footer.widthAnchor)
         ])
-        buildTheme(); buildBackground(); buildText(); buildColours(); buildCursor(); buildWindow(); buildShell(); buildBell(); buildKeyboardSounds(); buildProfiles(); buildMacros(); buildShortcuts(); buildClosing(); buildUpdates(); buildAdvanced()
+        buildTheme(); buildBackground(); buildText(); buildColours(); buildCursor(); buildWindow(); buildShell(); buildBell(); buildKeyboardSounds(); buildProfiles(); buildMacros(); buildShortcuts(); buildLookup(); buildClosing(); buildUpdates(); buildAdvanced()
         navigation.reloadData(); navigation.selectRowIndexes(IndexSet(integer:0),byExtendingSelection:false)
         refresh()
     }
@@ -925,10 +926,19 @@ final class AppearancePanel: NSWindowController, NSTextFieldDelegate, NSTableVie
         note("Restore the default preferences. A backup of the current configuration is saved first.",in:reset)
         let resetButton = button("Reset All Preferences…") { [weak self] in self?.resetPreferences() }; resetButton.contentTintColor = .systemRed; reset.addArrangedSubview(resetButton)
     }
+    private func buildLookup() {
+        let page = page("Look Up & Manuals")
+        note("Text actions are app-wide and apply immediately to every terminal.",in:page)
+        choice("lookup.forceClickAction","Force-click / Look Up gesture",\.lookup.forceClickAction,[("Off","off"),("Word definition","definition"),("Manual page","manual")],in:page)
+        note("Press firmly on a Force Touch trackpad, or use the macOS Look Up gesture. Control+Command+D and the Look Up context-menu action always show a word definition.",in:page)
+        check("lookup.commandClickManual","Command-click command names to open their manual pages",\.lookup.commandClickManual,in:page)
+        choice("lookup.manualPresentation","Open manual pages in",\.lookup.manualPresentation,[("Popover","popover"),("Separate window","window")],in:page)
+        note("Manuals come from this Mac, including when the terminal is connected to another machine. Select a command or a reference such as printf(3), then use Open Manual Page in the context menu or Control+Command+M (the default shortcut). Change that shortcut in Shortcuts. Search within a manual with Command+F; follow SEE ALSO links to related pages.",in:page)
+    }
     private func buildShortcuts() {
         let page = page("Shortcuts")
         note("Use cmd, shift, alt and ctrl, followed by a single key or return; for example cmd+shift+d or cmd+shift+return. Untick Enabled to disable a shortcut.",in:page)
-        let titles = ["newWindow":"New window","newTab":"New tab","splitRight":"Split right","splitDown":"Split down","closePane":"Close pane","nextPane":"Next pane","toggleMaximizePane":"Maximise pane","nextTab":"Next tab","reloadConfig":"Reload configuration","resetTerminal":"Reset terminal","openLayouts":"Open window layouts","toggleKeyboardSounds":"Keyboard sounds"]
+        let titles = ["openManualPage":"Open manual page","newWindow":"New window","newTab":"New tab","splitRight":"Split right","splitDown":"Split down","closePane":"Close pane","nextPane":"Next pane","toggleMaximizePane":"Maximise pane","nextTab":"Next tab","reloadConfig":"Reload configuration","resetTerminal":"Reset terminal","openLayouts":"Open window layouts","toggleKeyboardSounds":"Keyboard sounds"]
         for name in Configuration.actions {
             let title = titles[name] ?? "Select tab \(name.replacingOccurrences(of:"selectTab",with:""))"
             let field = NSTextField(); field.delegate = self; field.font = .monospacedSystemFont(ofSize:12,weight:.regular); register("keybindings."+name,field)

@@ -1176,7 +1176,7 @@ open class TerminalView: NSView, NSTextInputClient, NSUserInterfaceValidations, 
         let hit = calculateMouseHit(with:event).grid
         return linkAt(column:hit.col,bufferRow:hit.row)
     }
-    public override func mouseDown(with event: NSEvent) {
+    open override func mouseDown(with event: NSEvent) {
         commandLinkGesture = false; pressedLink = nil; didSelectionDrag = false; selectionDragAnchor = nil
         if event.modifierFlags.contains(.command) {
             if let link = link(at:event) { commandLinkGesture = true; pressedLink = link.link; commandLinkStart = event.locationInWindow; return }
@@ -1241,7 +1241,7 @@ open class TerminalView: NSView, NSTextInputClient, NSUserInterfaceValidations, 
         didSelectionDrag = false
     }
     
-    public override func mouseDragged(with event: NSEvent) {
+    open override func mouseDragged(with event: NSEvent) {
         if commandLinkGesture { if hypot(event.locationInWindow.x-commandLinkStart.x,event.locationInWindow.y-commandLinkStart.y) >= 4 { didSelectionDrag = true }; return }
         let displayBuffer = terminal.displayBuffer
         let mouseHit = calculateMouseHit(with: event)

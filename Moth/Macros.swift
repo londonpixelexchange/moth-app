@@ -32,6 +32,7 @@ final class MacroPlayer {
     private(set) var isPlaying = false
     func stop() { generation += 1; isPlaying = false }
     func play(_ macro: Configuration.Macro,in terminal: ShellView) {
+        guard !terminal.readOnly else { return }
         stop(); let token = generation
         if macro.keys.isEmpty {
             let bracket = terminal.getTerminal().bracketedPasteMode

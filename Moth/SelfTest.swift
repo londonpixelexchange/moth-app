@@ -15,6 +15,8 @@ import Metal
 enum SelfTest {
     static func run(app: App) {
         setbuf(stdout,nil)
+        if CommandLine.arguments.contains("--resize-only") { ResizeWindowChecks(app).run();return }
+        if CommandLine.arguments.contains("--manuals-only") { ManualViewerChecks(app).run();return }
         if CommandLine.arguments.contains("--metal-only") { MetalPresentationChecks(app).run();return }
         if CommandLine.arguments.contains("--lifecycle-only") { BackgroundLifecycleChecks(app).run();return }
         if CommandLine.arguments.contains("--panes-only") {
@@ -134,6 +136,7 @@ enum SelfTest {
         checks["boxDrawingUsesSameGridAsText"] = boxDrawingUsesSameGridAsText()
         fileDropChecks(into: &checks)
         definitionChecks(into: &checks)
+        manualChecks(into: &checks)
         alternateHistoryChecks(into: &checks)
         wheelChecks(into: &checks)
         appearanceFeatureChecks(app: app, into: &checks)
@@ -1931,6 +1934,63 @@ enum SelfTest {
         let actual = Double(pixels.reduce(0, +))/Double(pixels.count)
         return abs(actual - expected) < 2
     }
+    static func manualChecks(into checks: inout [String: Bool]) {
+        checks["manualReferencesKeepSections"] = ManualReference(" printf(3) ")?.query == "printf(3)"
+        checks["manualReferencesRejectShellInput"] = ["-a","/tmp/file","ls;touch /tmp/no","$(id)","ls\nwhoami","a b","foo(0)",String(repeating:"x",count:129)].allSatisfy { ManualReference($0) == nil }
+        checks["manualLinksPreserveSection"] = ManualReference.link(URL(string:"moth-man:printf(3)")!)?.query == "printf(3)"
+        checks["manualLinksRejectExternalURLs"] = ManualReference.link(URL(string:"https://example.com")!) == nil
+        do {
+            let html = try ManualPages.load(ManualReference("ls(1)")!).html
+            checks["manualRendersLocalPageAndSeeAlso"] = html.contains("list directory contents") && html.contains("moth-man:chmod(1)")
+            checks["manualHTMLBlocksExternalResources"] = html.contains("default-src 'none'")
+        } catch { checks["manualRendersLocalPageAndSeeAlso"] = false }
+        var config = Configuration(); config.lookup.forceClickAction = "manual"; config.lookup.manualPresentation = "window"; config.lookup.commandClickManual = false
+        do {
+            let decoded = try TOMLDecoder().decode(Configuration.self,from:Configuration.document(config))
+            checks["manualSettingsRoundTrip"] = decoded.lookup.forceClickAction == "manual" && decoded.lookup.manualPresentation == "window" && !decoded.lookup.commandClickManual
+        } catch { checks["manualSettingsRoundTrip"] = false }
+        do {
+            var old = Configuration(); old.keybindings.removeValue(forKey:"openManualPage")
+            let upgraded = try TOMLDecoder().decode(Configuration.self,from:Configuration.document(old))
+            checks["manualShortcutUpgradesExistingConfiguration"] = upgraded.keybindings["openManualPage"] == "cmd+ctrl+m"
+            var macro = Configuration.Macro(); macro.text = "hello"; macro.shortcut = "ctrl+cmd+m"; old.macros["Existing"] = macro
+            let retained = try TOMLDecoder().decode(Configuration.self,from:Configuration.document(old))
+            checks["manualShortcutUpgradePreservesExistingMacro"] = retained.keybindings["openManualPage"] == "" && retained.macros["Existing"]?.shortcut == "ctrl+cmd+m"
+        } catch { checks["manualShortcutUpgradesExistingConfiguration"] = false }
+        config.lookup.forceClickAction = "invalid"
+        checks["manualSettingsRejectUnknownActions"] = (try? config.validate()) == nil
+        let terminal = DefinitionCaptureView(frame:NSRect(x:0,y:0,width:600,height:200)); terminal.feed(text:"ls")
+        _ = terminal.revealSearchMatch(terminal.getTerminal().find("ls").matches.first!)
+        let point = terminal.definitionTarget()!.baselineOrigin
+        terminal.lookup.forceClickAction = "off"; terminal.performLookupGesture(at:point)
+        checks["forceClickOffSuppressesLookup"] = terminal.manuals.isEmpty && terminal.definitions.isEmpty
+        terminal.lookup.forceClickAction = "manual"; terminal.performLookupGesture(at:point)
+        checks["forceClickManualUsesLocalViewer"] = terminal.manuals == ["ls"] && terminal.definitions.isEmpty && terminal.sent.isEmpty
+        let event = NSEvent.keyEvent(with:.keyDown,location:.zero,modifierFlags:[.command,.control],timestamp:0,windowNumber:0,context:nil,characters:"m",charactersIgnoringModifiers:"m",isARepeat:false,keyCode:46)!
+        terminal.keyDown(with:event)
+        checks["manualShortcutPreservesSelectionAndPTY"] = terminal.manuals == ["ls","ls"] && terminal.getSelection() == "ls" && terminal.sent.isEmpty
+        terminal.manualShortcut = ""
+        terminal.lookup.forceClickAction = "definition"; terminal.performLookupGesture(at:point)
+        checks["forceClickDefinitionRemainsAvailable"] = terminal.definitions == ["ls"]
+        let down = NSEvent.mouseEvent(with:.leftMouseDown,location:point,modifierFlags:.command,timestamp:0,windowNumber:0,context:nil,eventNumber:0,clickCount:1,pressure:0)!
+        let up = NSEvent.mouseEvent(with:.leftMouseUp,location:point,modifierFlags:.command,timestamp:0,windowNumber:0,context:nil,eventNumber:0,clickCount:1,pressure:0)!
+        terminal.mouseDown(with:down); terminal.mouseUp(with:up)
+        checks["commandClickManualDoesNotType"] = terminal.manuals.count == 3 && terminal.sent.isEmpty
+        let ids = [UUID().uuidString,UUID().uuidString,UUID().uuidString]
+        let legacy = SavedTab(root:.split(vertical:true,fraction:0.4,first:.manual("ls"),second:.split(vertical:false,fraction:0.5,first:.pane,second:.pane)),activePane:2,sessions:ids)
+        if let retained = legacy.removingManualPanes() {
+            checks["manualPreviewMigrationKeepsTerminalSessions"] = retained.root.paneCount == 2 && retained.sessions == Array(ids.dropFirst()) && retained.activePane == 1
+            let restored = Workspace(config:Configuration(),startProcesses:false,saved:legacy)
+            checks["manualPreviewLayoutRestoresOnlyTerminals"] = restored.panes.count == 2 && restored.panes.allSatisfy { !$0.terminal.isHidden }
+            restored.stop()
+        } else { checks["manualPreviewMigrationKeepsTerminalSessions"] = false }
+        checks["manualOnlyPreviewLayoutIsRemoved"] = SavedTab(root:.manual("ls"),activePane:0).removingManualPanes() == nil
+        do {
+            var old = Configuration(); old.lookup.manualPresentation = "split"
+            let updated = try TOMLDecoder().decode(Configuration.self,from:Configuration.document(old))
+            checks["manualSplitPreferenceMigratesToWindow"] = updated.lookup.manualPresentation == "window"
+        } catch { checks["manualSplitPreferenceMigratesToWindow"] = false }
+    }
     static func definitionChecks(into checks: inout [String: Bool]) {
         let terminal = DefinitionCaptureView(frame:NSRect(x:0,y:0,width:600,height:200))
         terminal.feed(text:"hello world")
@@ -3268,10 +3328,148 @@ private final class MetalPresentationChecks {
 }
 
 private final class DefinitionCaptureView: ShellView {
+    var manuals: [String] = []
+    override func showManual(_ reference: ManualReference,at point: NSPoint? = nil) { manuals.append(reference.query) }
     var definitions: [String] = []
     var sent: [UInt8] = []
     override func showDefinition(for attrString: NSAttributedString?, at textBaselineOrigin: NSPoint) {
         definitions.append(attrString?.string ?? "")
     }
     override func send(source: TerminalView, data: ArraySlice<UInt8>) { sent.append(contentsOf:data) }
+}
+
+private final class ManualViewerChecks {
+    let app: App
+    var checks: [String:Bool] = [:]
+    var finished = false
+    init(_ app: App) { self.app = app }
+    func run() {
+        SelfTest.manualChecks(into:&checks)
+        guard let window = app.active else { checks["manualViewerWindowExists"] = false; finish(); return }
+        window.window?.setContentSize(NSSize(width:1100,height:700)); window.content.layoutSubtreeIfNeeded()
+        let workspace = window.workspace,source = window.workspace.active!
+        let frame = source.frame,pid = source.terminal.process.shellPid
+        source.terminal.lookup.manualPresentation = "popover"
+        source.terminal.showManual(ManualReference("ls(1)")!)
+        guard let viewer = source.terminal.presentedManual else { checks["manualViewerPopoverOpens"] = false; finish();return }
+        wait(viewer) { [self] in
+            checks["manualViewerPopoverPreservesTerminalLayout"] = workspace.panes.count == 1 && source.frame == frame && source.terminal.process.shellPid == pid
+            viewer.searchField.stringValue = "directory"
+            viewer.find { [self] found in
+                checks["manualViewerNativeSearchFindsText"] = found
+                viewer.snapshot { [self] image in
+                    if let data = image?.tiffRepresentation,let bitmap = NSBitmapImageRep(data:data),let png = bitmap.representation(using:.png,properties:[:]) {
+                        let path = URL(fileURLWithPath:ProcessInfo.processInfo.environment["MOTH_TEST_RESULT"]!).deletingLastPathComponent().appendingPathComponent("ManualPreview.png")
+                        try? png.write(to:path); checks["manualViewerRenderedSnapshot"] = bitmap.pixelsWide > 100 && bitmap.pixelsHigh > 100
+                    } else { checks["manualViewerRenderedSnapshot"] = false }
+                    viewer.open(ManualReference.link(URL(string:"moth-man:chmod(1)")!)!)
+                    wait(viewer) { [self] in
+                        checks["manualViewerRelatedPageLoads"] = viewer.reference.query == "chmod(1)" && viewer.renderedHTML?.contains("change file modes") == true
+                        app.find(nil)
+                        checks["manualViewerPopoverUsesAppFind"] = viewer.searchField.currentEditor() != nil
+                        viewer.onOpenWindow?(viewer.reference)
+                        guard let reference = app.manualWindows.last else { checks["manualViewerOpensReferenceWindow"] = false;finish();return }
+                        checks["manualViewerOpensReferenceWindow"] = reference.viewer === viewer && reference.window?.isVisible == true && source.terminal.presentedManual == nil
+                        checks["manualViewerTransferRetainsDocument"] = viewer.documentLoaded && viewer.reference.query == "chmod(1)"
+                        app.find(nil)
+                        checks["manualReferenceWindowUsesAppFind"] = viewer.searchField.currentEditor() != nil
+                        checks["manualReferenceWindowDoesNotCreatePanes"] = workspace.panes.count == 1 && source.frame == frame && source.terminal.process.shellPid == pid
+                        viewer.open(ManualReference("moth_missing_manual_123456")!)
+                        wait(viewer,expectError:true) { [self] in
+                            checks["manualViewerMissingPageShowsInlineError"] = viewer.lastError != nil && viewer.documentLoaded
+                            reference.close()
+                            checks["manualReferenceWindowClosesIndependently"] = app.manualWindows.isEmpty && source.terminal.process.running && workspace.panes.count == 1
+                            source.terminal.lookup.manualPresentation = "window"
+                            source.terminal.showManual(ManualReference("printf(3)")!)
+                            guard let direct = app.manualWindows.last else { checks["manualWindowPreferenceWorks"] = false;finish();return }
+                            wait(direct.viewer) { [self] in
+                                checks["manualWindowPreferenceWorks"] = direct.viewer.reference.query == "printf(3)" && direct.window?.isVisible == true && source.terminal.presentedManual == nil
+                                let reused = app.showManualWindow(ManualReference("ls")!)
+                                checks["manualWindowPreferenceReusesReferenceWindow"] = reused === direct && app.manualWindows.count == 1
+                                direct.close();finish()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline:.now()+30) { [self] in if !finished { checks["manualViewerFinishedBeforeTimeout"] = false;finish() } }
+    }
+    func wait(_ viewer: ManualPageController,expectError: Bool = false,remaining: Int = 150,done: @escaping ()->Void) {
+        guard !finished else { return }
+        if viewer.documentLoaded && (expectError ? viewer.lastError != nil : viewer.renderedHTML != nil) { done();return }
+        guard remaining > 0 else { print("Manual load timeout:",viewer.renderedHTML?.count ?? 0,viewer.lastError ?? "no error",viewer.documentLoaded);checks["manualViewerLoadedBeforeTimeout"] = false;finish();return }
+        DispatchQueue.main.asyncAfter(deadline:.now()+0.1) { [self] in wait(viewer,expectError:expectError,remaining:remaining-1,done:done) }
+    }
+    func finish() {
+        guard !finished else { return }; finished = true
+        let path = ProcessInfo.processInfo.environment["MOTH_TEST_RESULT"] ?? "/tmp/moth-manual-results.json"
+        try! JSONSerialization.data(withJSONObject:checks,options:[.prettyPrinted,.sortedKeys]).write(to:URL(fileURLWithPath:path))
+        print("Manual viewer checks:",checks)
+        Array(app.manualWindows).forEach { $0.close() }
+        app.windows.forEach { $0.stop() }; NSApp.terminate(nil)
+    }
+}
+
+/// Programmatic window-resize timings exercise the same layout, reflow and
+/// drawing path. They do not measure mouse-drag latency or other terminal apps.
+private final class ResizeWindowChecks {
+    let app: App
+    var checks: [String:Bool] = [:]
+    var measurements: [[String:Any]] = []
+    var finished = false
+    let scenarios = [("empty-minimal",0,false,false),("history-minimal",3000,false,false),("selection-history-minimal",3000,true,false),("empty-dynamic",0,false,true)]
+    init(_ app: App) { self.app = app }
+    func run() {
+        guard let terminal = app.active?.workspace.active.terminal else { finish();return }
+        // Keep the PTY running for real resize notifications, with no prompt or
+        // readline repaint altering the selection/content under measurement.
+        terminal.sendUserText("stty -echo; printf '%s%s\\n' MOTH_RESIZE_ QUIET; exec /bin/sleep 60\r")
+        func ready(_ remaining: Int) {
+            if !terminal.getTerminal().find("MOTH_RESIZE_QUIET").matches.isEmpty {
+                DispatchQueue.main.asyncAfter(deadline:.now()+0.1) { self.scenario(0) };return
+            }
+            guard remaining > 0 else { self.checks["resizeFixtureReady"] = false;self.finish();return }
+            DispatchQueue.main.asyncAfter(deadline:.now()+0.05) { ready(remaining-1) }
+        }
+        ready(120)
+        DispatchQueue.main.asyncAfter(deadline:.now()+45) { [self] in if !finished { checks["resizeMeasurementCompleted"] = false;finish() } }
+    }
+    func scenario(_ index: Int) {
+        guard !finished else { return }
+        guard index < scenarios.count,let host = app.active else { finish();return }
+        let (name,history,selected,animated) = scenarios[index]
+        var config = Configuration();config.background.style = animated ? "flow":"solid";config.cursor.animation = "noblink"
+        app.config = config;app.applyAppearance()
+        let terminal = host.workspace.active.terminal
+        terminal.selectNone();terminal.getTerminal().resetFromHost()
+        host.window?.setContentSize(NSSize(width:1000,height:640));host.content.layoutSubtreeIfNeeded()
+        if history > 0 { terminal.feed(text:(0..<history).map { "resize row \($0) history text abcdefghijklmnopqrstuvwxyz\r\n" }.joined()) }
+        if selected,let match = terminal.getTerminal().find("resize row 2999").matches.first { _ = terminal.revealSearchMatch(match) }
+        var samples: [Double] = []
+        func step(_ count: Int) {
+            guard !self.finished else { return }
+            let start = ProcessInfo.processInfo.systemUptime
+            let sweep = count%60,offset = sweep < 30 ? sweep : 60-sweep
+            host.window?.setContentSize(NSSize(width:820+offset*12,height:600+count%9*3))
+            host.content.layoutSubtreeIfNeeded();terminal.needsDisplay = true;host.content.displayIfNeeded();CATransaction.flush()
+            if count >= 6 { samples.append((ProcessInfo.processInfo.systemUptime-start)*1000) }
+            if count < 65 { DispatchQueue.main.asyncAfter(deadline:.now()+0.01) { step(count+1) };return }
+            let ordered = samples.sorted(),total = samples.reduce(0,+)
+            let values: [String:Any] = ["scenario":name,"samples":samples.count,"meanMilliseconds":total/Double(samples.count),"medianMilliseconds":ordered[ordered.count/2],"p95Milliseconds":ordered[Int(Double(ordered.count-1)*0.95)],"maximumMilliseconds":ordered.last!]
+            self.measurements.append(values);print("WINDOW_RESIZE_BENCH",values)
+            let core = terminal.getTerminal()
+            self.checks["resizeFinalDimensions_"+name] = host.workspace.active.dimensions.stringValue == "\(core.cols) × \(core.rows)" && host.status.stringValue.contains("\(core.cols) × \(core.rows)")
+            if selected { self.checks["resizeKeepsSelection"] = terminal.getSelection() == "resize row 2999" }
+            DispatchQueue.main.asyncAfter(deadline:.now()+0.1) { self.scenario(index+1) }
+        }
+        DispatchQueue.main.asyncAfter(deadline:.now()+0.2) { step(0) }
+    }
+    func finish() {
+        guard !finished else { return };finished = true
+        let path = URL(fileURLWithPath:ProcessInfo.processInfo.environment["MOTH_TEST_RESULT"] ?? "/tmp/moth-resize-results.json")
+        try! JSONSerialization.data(withJSONObject:checks,options:[.prettyPrinted,.sortedKeys]).write(to:path)
+        try! JSONSerialization.data(withJSONObject:measurements,options:[.prettyPrinted,.sortedKeys]).write(to:path.deletingLastPathComponent().appendingPathComponent("ResizeMeasurements.json"))
+        app.windows.forEach { $0.stop() };NSApp.terminate(nil)
+    }
 }

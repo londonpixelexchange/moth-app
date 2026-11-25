@@ -201,6 +201,7 @@ extension App {
             global.keybindings = candidate.keybindings; global.macros = candidate.macros; global.closeConfirmation = candidate.closeConfirmation
             global.enabledEncodings = candidate.enabledEncodings
             global.updates = candidate.updates
+            global.lookup = candidate.lookup
             global.showLayoutsOnLaunch = candidate.showLayoutsOnLaunch; global.defaultProfileID = candidate.defaultProfileID
             global.advanced.sessionRecovery = candidate.advanced.sessionRecovery
             global.advanced.allowDoubleSizeLines = candidate.advanced.allowDoubleSizeLines

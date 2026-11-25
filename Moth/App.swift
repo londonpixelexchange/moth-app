@@ -20,6 +20,7 @@ final class App: NSObject, NSApplicationDelegate, NSMenuItemValidation {
     var layoutChooser: WindowLayoutChooser?
     var aboutWindow: AboutWindowController?
     var releaseNotesWindow: ReleaseNotesWindowController?
+    private(set) var manualWindows: [ManualWindowController] = []
     let updateChecker = UpdateChecker()
     weak var lastTerminalWindow: TerminalWindowController?
     private(set) var bellCount = 0
@@ -173,9 +174,22 @@ final class App: NSObject, NSApplicationDelegate, NSMenuItemValidation {
         if menuItem.action == #selector(runMacro(_:)) { return active != nil && MacroRecorder.shared.source == nil }
         return true
     }
-    @objc func find(_ sender: Any?) { active?.showFind() }
-    @objc func findNext(_ sender: Any?) { active?.stepFind(1) }
-    @objc func findPrevious(_ sender: Any?) { active?.stepFind(-1) }
+    private var currentManual: ManualPageController? {
+        (NSApp.keyWindow?.windowController as? ManualWindowController)?.viewer ?? active?.workspace.active?.terminal.presentedManual
+    }
+    @discardableResult func showManualWindow(_ reference: ManualReference,viewer: ManualPageController? = nil) -> ManualWindowController {
+        if viewer == nil,let existing = manualWindows.last {
+            existing.viewer.open(reference); existing.showWindow(nil); existing.window?.makeKeyAndOrderFront(nil); return existing
+        }
+        let controller = ManualWindowController(reference,viewer:viewer)
+        controller.onClose = { [weak self,weak controller] in self?.manualWindows.removeAll { $0 === controller } }
+        manualWindows.append(controller); controller.showWindow(nil); controller.window?.makeKeyAndOrderFront(nil)
+        return controller
+    }
+    @objc func openManualPage(_ sender: Any?) { active?.workspace.active?.terminal.openManualSelection(sender) }
+    @objc func find(_ sender: Any?) { if let manual = currentManual { manual.focusSearch() } else { active?.showFind() } }
+    @objc func findNext(_ sender: Any?) { if let manual = currentManual { manual.find() } else { active?.stepFind(1) } }
+    @objc func findPrevious(_ sender: Any?) { if let manual = currentManual { manual.find(backwards:true) } else { active?.stepFind(-1) } }
     @objc func moveTabLeft(_ sender: Any?) { active?.moveActiveTab(by: -1) }
     @objc func moveTabRight(_ sender: Any?) { active?.moveActiveTab(by: 1) }
     @objc func closePane(_ sender: Any?) {
@@ -270,6 +284,7 @@ final class App: NSObject, NSApplicationDelegate, NSMenuItemValidation {
             let entry = NSMenuItem(title: title, action: selector, keyEquivalent: key); edit.addItem(entry)
         }
         edit.addItem(.separator())
+        item(edit,"Open Manual Page",#selector(openManualPage(_:)),action:"openManualPage")
         item(edit, "Find…", #selector(find(_:)), "f")
         item(edit, "Find Next", #selector(findNext(_:)), "g")
         item(edit, "Find Previous", #selector(findPrevious(_:)), "g", [.command, .shift])

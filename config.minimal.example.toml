@@ -166,6 +166,14 @@ volume = 0.12
 enabled = true
 ignorePrograms = [ 'zsh', 'bash', 'fish', 'sh', 'dash', 'tcsh', 'csh', 'nu' ]
 
+# App-wide text actions. forceClickAction: off | definition | manual.
+# commandClickManual opens local manual pages for command names; URLs keep their normal action.
+# manualPresentation: popover | window. Manuals use this Mac's installed documentation.
+[lookup]
+commandClickManual = true
+forceClickAction = 'definition'
+manualPresentation = 'popover'
+
 # checkAtLaunch checks getmoth.dev for releases at launch. Downloads open in your browser. App-wide.
 [updates]
 checkAtLaunch = true
@@ -196,6 +204,7 @@ newWindow = 'cmd+n'
 nextPane = 'cmd+]'
 nextTab = 'cmd+shift+]'
 openLayouts = 'cmd+shift+r'
+openManualPage = 'cmd+ctrl+m'
 reloadConfig = 'cmd+alt+r'
 resetTerminal = 'cmd+r'
 selectTab1 = 'cmd+1'

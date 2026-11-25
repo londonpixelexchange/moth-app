@@ -79,20 +79,91 @@ class ShellView: LocalProcessTerminalView {
         guard !readOnly else { return }; userInputDepth += 1; defer { userInputDepth -= 1 }; super.paste(sender)
     }
     override func mouseUp(with event: NSEvent) {
+        defer { didForceLookup = false }
+        if let pending = commandManual {
+            commandManual = nil
+            let point = convert(event.locationInWindow,from:nil)
+            if !commandManualDragged,hypot(point.x-pending.point.x,point.y-pending.point.y) < 4,event.modifierFlags.contains(.command) { showManual(pending.reference,at:point) }
+            return
+        }
         super.mouseUp(with:event)
         if !readOnly,advanced.copyOnSelect,!(getSelection() ?? "").isEmpty { copy(self) }
     }
     override var acceptsFirstResponder: Bool { !readOnly && super.acceptsFirstResponder }
+    var lookup = Configuration.Lookup()
+    var manualShortcut = "cmd+ctrl+m"
+    private var manualPopover: NSPopover?
+    var presentedManual: ManualPageController? { manualPopover?.isShown == true ? manualPopover?.contentViewController as? ManualPageController : nil }
+    private var commandManualDragged = false
+    private var commandManual: (reference: ManualReference, point: NSPoint)?
+    private var didForceLookup = false
+    private func isManualShortcut(_ event: NSEvent) -> Bool {
+        guard let (key,flags) = Configuration.shortcut(manualShortcut) else { return false }
+        return event.modifierFlags.intersection([.command,.control,.option,.shift]) == flags && event.charactersIgnoringModifiers?.lowercased() == key
+    }
+    @objc func openManualSelection(_ sender: Any?) {
+        guard let selection = getSelection(),let reference = ManualReference(selection) else { return }
+        showManual(reference)
+    }
+    func showManual(_ reference: ManualReference,at point: NSPoint? = nil) {
+        guard let owner = contextOwner else { return }
+        if lookup.manualPresentation == "window" {
+            owner.0.application.showManualWindow(reference); return
+        }
+        manualPopover?.close()
+        let controller = ManualPageController(reference)
+        let popover = NSPopover(); popover.behavior = .semitransient; popover.contentViewController = controller
+        let available = window?.contentView?.bounds.size ?? NSSize(width:800,height:600)
+        popover.contentSize = NSSize(width:min(760,max(320,available.width-40)),height:min(560,max(240,available.height-60)))
+        controller.onOpenWindow = { [weak self,weak controller,weak popover] _ in
+            guard let self,let controller,let owner = self.contextOwner else { return }
+            popover?.animates = false; popover?.close(); popover?.contentViewController = nil
+            self.manualPopover = nil
+            owner.0.application.showManualWindow(controller.reference,viewer:controller)
+        }
+        manualPopover = popover
+        let origin = point ?? definitionTarget()?.baselineOrigin ?? NSPoint(x:bounds.midX,y:bounds.midY)
+        popover.show(relativeTo:NSRect(origin:origin,size:NSSize(width:1,height:1)),of:self,preferredEdge:.maxY)
+    }
+    func performLookupGesture(at point: NSPoint) {
+        guard lookup.forceClickAction != "off",let target = definitionTarget(at:point) else { return }
+        if lookup.forceClickAction == "manual" {
+            if let reference = ManualReference(target.text.string) { showManual(reference,at:point) }
+        } else { showDefinition(for:target.text,at:target.baselineOrigin) }
+    }
+    override func pressureChange(with event: NSEvent) {
+        guard event.stage >= 2,!didForceLookup,lookup.forceClickAction != "off" else { return }
+        didForceLookup = true; performLookupGesture(at:convert(event.locationInWindow,from:nil))
+    }
+    override func mouseDown(with event: NSEvent) {
+        didForceLookup = false; commandManual = nil; commandManualDragged = false
+        if lookup.commandClickManual,event.modifierFlags.intersection([.command,.control,.option,.shift]) == .command,link(at:event) == nil {
+            let point = convert(event.locationInWindow,from:nil)
+            if let target = definitionTarget(at:point),let reference = ManualReference(target.text.string) { commandManual = (reference,point); return }
+        }
+        super.mouseDown(with:event)
+    }
+    override func mouseDragged(with event: NSEvent) {
+        if let pending = commandManual {
+            let point = convert(event.locationInWindow,from:nil)
+            if hypot(point.x-pending.point.x,point.y-pending.point.y) >= 4 { commandManualDragged = true }
+            return
+        }
+        super.mouseDragged(with:event)
+    }
     var keyboardSound = Configuration.KeyboardSound()
     private func isDefinitionShortcut(_ event: NSEvent) -> Bool {
         event.modifierFlags.intersection([.command,.control,.option,.shift]) == [.command,.control] && event.charactersIgnoringModifiers?.lowercased() == "d"
     }
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        if window?.firstResponder === self,isDefinitionShortcut(event) { lookUpSelection(nil); return true }
+        if window?.firstResponder === self {
+            if isDefinitionShortcut(event) { lookUpSelection(nil); return true }
+            if isManualShortcut(event) { openManualSelection(nil); return true }
+        }
         return super.performKeyEquivalent(with:event)
     }
     override func quickLook(with event: NSEvent) {
-        presentDefinition(at:convert(event.locationInWindow,from:nil))
+        if !didForceLookup { performLookupGesture(at:convert(event.locationInWindow,from:nil)) }
     }
     @objc func lookUpSelection(_ sender: Any?) { presentDefinition() }
     private func presentDefinition(at point: NSPoint? = nil) {
@@ -102,6 +173,7 @@ class ShellView: LocalProcessTerminalView {
     override func keyDown(with event: NSEvent) {
         // Handle Look Up before SwiftTerm clears the selection or encodes Control-D.
         if isDefinitionShortcut(event) { lookUpSelection(nil); return }
+        if isManualShortcut(event) { openManualSelection(nil); return }
         guard !readOnly else { return }
         if KeyboardSoundPlayer.shouldPlay(event) { KeyboardSoundPlayer.shared.play(keyboardSound) }
         userInputDepth += 1; defer { userInputDepth -= 1 }
@@ -182,6 +254,7 @@ class ShellView: LocalProcessTerminalView {
         }
         let definition = definitionTarget(at:convert(event.locationInWindow,from:nil))
         add("Look Up",#selector(lookUpSelection(_:)),enabled:definition != nil)
+        add("Open Manual Page",#selector(openManualSelection(_:)),enabled:definition.flatMap { ManualReference($0.text.string) } != nil)
         menu.addItem(.separator())
         add("Copy",#selector(copy(_:)),enabled:!(getSelection() ?? "").isEmpty)
         add("Paste",#selector(paste(_:)),enabled:!readOnly && NSPasteboard.general.string(forType:.string) != nil)
@@ -460,6 +533,8 @@ final class Pane: NSView, LocalProcessTerminalViewDelegate {
         terminal.configureCursor(shape: config.cursor.shape, animation: config.cursor.animation, period: config.cursor.period)
         terminal.getTerminal().setAlternateScreenScrollback(config.alternateScreenScrollback)
         terminal.optionAsMetaKey = config.optionAsMeta
+        terminal.lookup = config.lookup; terminal.manualShortcut = config.keybindings["openManualPage"] ?? ""
+        terminal.pressureConfiguration = NSPressureConfiguration(pressureBehavior:config.lookup.forceClickAction == "off" ? .primaryDefault : .primaryDeepClick)
         if appliedHistory != config.scrollback { terminal.getTerminal().changeHistorySize(config.scrollback); appliedHistory = config.scrollback }
         terminal.needsDisplay = true
     }
@@ -534,7 +609,7 @@ final class Workspace {
     init(config: Configuration, startProcesses: Bool = true, saved: SavedTab? = nil, inheritedDirectory: String? = nil, adopting: Pane? = nil) {
         self.startProcesses = startProcesses
         if let adopting { panes.append(adopting); bind(adopting); mount(adopting,in:root); active = adopting }
-        else if let saved {
+        else if let saved = saved?.removingManualPanes() {
             recoveringSessions = saved.sessions ?? []
             let view = restoredView(saved.root,config:config); mount(view,in:root)
             active = panes[min(saved.activePane,panes.count-1)]
@@ -544,6 +619,7 @@ final class Workspace {
     private func restoredView(_ node: SavedSplit,config: Configuration) -> NSView {
         switch node {
         case .pane:return makePane(config)
+        case .manual:return makePane(config) // Old preview layouts are normalised before restoration.
         case let .split(vertical,fraction,first,second):
             let split = TerminalSplitView(); split.isVertical = vertical; split.dividerStyle = .thin
             for child in [first,second] { let view = restoredView(child,config:config); view.translatesAutoresizingMaskIntoConstraints = true; split.addArrangedSubview(view) }
@@ -580,7 +656,7 @@ final class Workspace {
         var launchConfig = config
         if config.advanced.inheritWorkingDirectory,let directory = ProcessInspector.usableDirectory(directory) { launchConfig.advanced.workingDirectory = directory }
         let recovering = recoveringSessions.isEmpty ? nil : recoveringSessions.removeFirst()
-        let pane = Pane(config: launchConfig,start:startProcesses,recovering:recovering)
+        let pane = Pane(config:launchConfig,start:startProcesses,recovering:recovering)
         panes.append(pane); bind(pane)
         return pane
     }
