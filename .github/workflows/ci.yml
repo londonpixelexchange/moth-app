@@ -1,0 +1,33 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  build-and-test:
+    name: Build and core tests
+    runs-on: macos-26
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Select runner Xcode
+        run: echo "DEVELOPER_DIR=$(xcode-select -p)" >> "$GITHUB_ENV"
+      - name: Check shell and Python scripts
+        run: |
+          for script in build.sh test.sh test-app.sh scripts/*.sh; do bash -n "$script"; done
+          python3 -m compileall -q scripts
+      - name: Build macOS app without distribution credentials
+        run: |
+          xcodebuild -project Moth.xcodeproj -scheme Moth -configuration Release \
+            -destination 'platform=macOS,arch=arm64' -derivedDataPath Build/CI \
+            build ARCHS=arm64 CODE_SIGNING_ALLOWED=NO
+      - name: Run terminal-core tests
+        run: swift test -c release --package-path Vendor/SwiftTerm --scratch-path Build/CoreTests
