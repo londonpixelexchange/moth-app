@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.28.1",
+    "build": 70,
+    "status": "released",
+    "sections": [
+      {
+        "title": "Fixed",
+        "items": [
+          "Mouse motion reporting now distinguishes hovering, dragging and button releases correctly, fixing unwanted selections in mouse-aware terminal programs. Thanks to Finn Roach for the fix.",
+          "Held letters repeat by default instead of invoking macOS press-and-hold accent selection.",
+          "Clicking a split pane when returning from another application immediately focuses that pane, including clicks in its padding.",
+          "Creating a split immediately deactivates the previous pane’s cursor, so only the focused pane shows an active cursor."
+        ]
+      },
+      {
+        "title": "Improved",
+        "items": [
+          "Faster rendering of truecolor block animations, with bounded colour caches during long sessions.",
+          "Finn Roach has been added to Thanks."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.28.0",
     "build": 69,
     "status": "released",

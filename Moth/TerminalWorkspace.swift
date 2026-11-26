@@ -135,7 +135,10 @@ class ShellView: LocalProcessTerminalView {
         guard event.stage >= 2,!didForceLookup,lookup.forceClickAction != "off" else { return }
         didForceLookup = true; performLookupGesture(at:convert(event.locationInWindow,from:nil))
     }
+    // Deliver the activating click so it can choose a split pane immediately.
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
     override func mouseDown(with event: NSEvent) {
+        window?.makeFirstResponder(self)
         didForceLookup = false; commandManual = nil; commandManualDragged = false
         if lookup.commandClickManual,event.modifierFlags.intersection([.command,.control,.option,.shift]) == .command,link(at:event) == nil {
             let point = convert(event.locationInWindow,from:nil)
@@ -545,6 +548,9 @@ final class Pane: NSView, LocalProcessTerminalViewDelegate {
         apply(config)
     }
     @objc func closeThisPane(_ sender: Any?) { onClose?() }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+    override func mouseDown(with event: NSEvent) { window?.makeFirstResponder(terminal) }
+
     func showSplitControl(_ visible: Bool) { closeButton.isHidden = !visible; dragHandle.isHidden = !visible; terminalTop.constant = visible ? 24 : 10 }
     func setActive(_ active: Bool) { label.textColor = active ? terminal.caretColor : .secondaryLabelColor; label.stringValue = "\(active ? "●" : "○")  \(title)" }
     func sizeChanged(source: LocalProcessTerminalView, newCols: Int, newRows: Int) { dimensions.stringValue = "\(newCols) × \(newRows)"; if !terminal.replayingSession { changed?() } }
@@ -717,6 +723,9 @@ final class Workspace {
         guard panes.count < Self.maximumPanes, let old = active, let parent = old.superview else { NSSound.beep(); return }
         // Replace a leaf with a nested split, preserving the existing PTY and scrollback.
         guard vertical ? old.bounds.width >= 420 : old.bounds.height >= 280 else { NSSound.beep(); return }
+        // AppKit may drop the responder while reparenting without calling its
+        // resignation hook. Clear focus while the old terminal is still attached.
+        old.window?.makeFirstResponder(nil)
         let split = TerminalSplitView(frame:old.frame); split.isVertical = vertical; split.dividerStyle = .thin
         if let parentSplit = parent as? NSSplitView {
             let frames = parentSplit.arrangedSubviews.map { ($0,$0.frame) }

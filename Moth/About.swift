@@ -5,7 +5,7 @@
 import AppKit
 
 final class AboutWindowController: NSWindowController {
-    let thanksText = NSTextField(labelWithString:"Pedro Ortiz Suarez\nDevon Dugentas\nThijs Dalhuijsen\nMalte Ostendorff\nMike Abbey\nPaul Bernicchi")
+    let thanksText = NSTextField(labelWithString:"Pedro Ortiz Suarez\nDevon Dugentas\nThijs Dalhuijsen\nMalte Ostendorff\nMike Abbey\nPaul Bernicchi\nFinn Roach")
     let versionText = NSTextField(labelWithString:"")
     let contentStack = NSStackView()
     private var licences: NSWindowController?

@@ -58,6 +58,12 @@ struct PowerlineRenderItem {
     let foregroundColor: TTColor
 }
 
+struct CellBackgroundRenderItem {
+    let column: Int
+    let columnWidth: Int
+    let color: TTColor
+}
+
 // Holds the information used to render a line
 struct ViewLineInfo {
     // Contains the generated segments for this line
@@ -68,6 +74,7 @@ struct ViewLineInfo {
     var blockElements: [BlockElementRenderItem]
     var boxDrawings: [BoxDrawingRenderItem]
     var powerline: [PowerlineRenderItem]
+    var cellBackgrounds: [CellBackgroundRenderItem] = []
 }
 
 extension TerminalView {
@@ -242,6 +249,8 @@ extension TerminalView {
                                         blue: CGFloat (b) / 255.0,
                                         alpha: 1.0)
             
+            // Animated truecolour output can otherwise retain millions of colours.
+            if trueColors.count >= 4096 { trueColors.removeAll(keepingCapacity: true) }
             trueColors [color] = newColor
             return newColor
         }
@@ -378,16 +387,30 @@ extension TerminalView {
     }
     
     //
-    // Given a vt100 attribute, return the NSAttributedString attributes used to render it
-    //
+    // Shared by text and geometric cells, including inverse, bright and faint colours.
+    private func cellColors(_ attribute: Attribute) -> (foreground: TTColor, background: TTColor) {
+        let fg = attribute.fg, bg = attribute.bg, flags = attribute.style
+        let isBold = flags.contains(.bold), inverse = flags.contains(.inverse)
+        var fgColor = mapColor (color: fg, isFg: true, isBold: isBold, useBrightColors: useBrightColors)
+        var bgColor = mapColor(color:bg,isFg:false,isBold:false)
+        // Resolve default colours in their original roles before swapping.
+        if inverse {
+            swap(&fgColor,&bgColor)
+            fgColor = fgColor.withAlphaComponent(1)
+            bgColor = bgColor.withAlphaComponent(1)
+        }
+        // Apply dim/faint attribute (SGR 2) - reduce color intensity
+        if flags.contains(.dim) {
+            fgColor = fgColor.dimmedColor()
+        }
+        return (fgColor, bgColor)
+    }
+
+    // Given a vt100 attribute, return the NSAttributedString attributes used to render it.
     func getAttributes (_ attribute: Attribute, withUrl: Bool) -> [NSAttributedString.Key:Any]?
     {
         let flags = attribute.style
-        let bg = attribute.bg
         let fg = attribute.fg
-        // Resolve defaults in their original roles before swapping. A transparent
-        // canvas is a presentation choice, not a transparent reverse-video glyph.
-        let inverse = flags.contains(.inverse)
         
         if let result = withUrl ? urlAttributes [attribute] : attributes [attribute] {
             return result
@@ -419,17 +442,7 @@ extension TerminalView {
             tf = fontSet.normal
         }
         
-        var fgColor = mapColor (color: fg, isFg: true, isBold: isBold, useBrightColors: useBrightColors)
-        var bgColor = mapColor(color:bg,isFg:false,isBold:false)
-        if inverse {
-            swap(&fgColor,&bgColor)
-            fgColor = fgColor.withAlphaComponent(1)
-            bgColor = bgColor.withAlphaComponent(1)
-        }
-        // Apply dim/faint attribute (SGR 2) - reduce color intensity
-        if flags.contains(.dim) {
-            fgColor = fgColor.dimmedColor()
-        }
+        let (fgColor, bgColor) = cellColors(attribute)
         var nsattr: [NSAttributedString.Key:Any] = [
             .font: tf,
             .foregroundColor: fgColor,
@@ -455,9 +468,11 @@ extension TerminalView {
             nsattr [.underlineColor] = fgColor
             
             // Add to cache
+            if urlAttributes.count >= 4096 { urlAttributes.removeAll(keepingCapacity: true) }
             urlAttributes [attribute] = nsattr
         } else {
             // Just add to cache
+            if attributes.count >= 4096 { attributes.removeAll(keepingCapacity: true) }
             attributes [attribute] = nsattr
         }
         return nsattr
@@ -565,6 +580,7 @@ extension TerminalView {
         var previousPlaceholder: KittyPlaceholderCell?
         var previousPlaceholderAttribute: Attribute?
         var blockElements: [BlockElementRenderItem] = []
+        var cellBackgrounds: [CellBackgroundRenderItem] = []
         var boxDrawings: [BoxDrawingRenderItem] = []
         var powerline: [PowerlineRenderItem] = []
         
@@ -573,6 +589,32 @@ extension TerminalView {
             let width = max(1, Int(ch.width))
             let attr = ch.attribute
             let hasUrl = ch.hasPayload
+            let isSpace = ch.code == 0 || ch.code == 32
+            let blockRects = customBlockGlyphs && ch.code >= BlockElementMapping.lowerBoundary && ch.code <= BlockElementMapping.upperBoundary
+                ? BlockElementMapping.rects(for: UInt32(ch.code)) : nil
+            // Spaces and undecorated block elements need no font shaping. In
+            // per-cell colour animations even the replacement spaces previously
+            // produced thousands of CoreText attribute runs every frame.
+            if !hasUrl && attr.style.intersection([.underline, .crossedOut]).isEmpty,
+               (isSpace && builder == nil) || blockRects != nil {
+                if let finished = builder?.buildIfNeeded() { segments.append(finished) }
+                builder = nil
+                let colors = cellColors(attr)
+                let background = isColumnSelected(selectionColumns, column: col, width: width)
+                    ? selectedTextBackgroundColor : colors.background
+                cellBackgrounds.append(CellBackgroundRenderItem(column: col, columnWidth: width, color: background))
+                #if os(macOS)
+                let hide = attr.style.contains(.blink) && !textBlinkVisible
+                #else
+                let hide = false
+                #endif
+                if !isSpace, !hide, let rects = blockRects {
+                    blockElements.append(BlockElementRenderItem(column: col, columnWidth: width, rects: rects, foregroundColor: colors.foreground))
+                }
+                previousPlaceholder = nil; previousPlaceholderAttribute = nil
+                col += width
+                continue
+            }
             guard let attributes = getAttributes(attr, withUrl: hasUrl) else {
                 if let finished = builder?.buildIfNeeded() {
                     segments.append(finished)
@@ -665,7 +707,8 @@ extension TerminalView {
                             kittyPlaceholders: kittyPlaceholders,
                             blockElements: blockElements,
                             boxDrawings: boxDrawings,
-                            powerline: powerline)
+                            powerline: powerline,
+                            cellBackgrounds: cellBackgrounds)
     }
     
     /// Returns the selection range for the specified row, if any.
@@ -1154,6 +1197,24 @@ extension TerminalView {
                         }
                     }
                 }
+            }
+
+            if !lineInfo.cellBackgrounds.isEmpty {
+                context.saveGState()
+                context.setShouldAntialias(false)
+                for background in lineInfo.cellBackgrounds {
+                    let rect = CGRect(x: lineOrigin.x + CGFloat(background.column) * cellDimension.width,
+                                      y: lineOrigin.y, width: CGFloat(background.columnWidth) * cellDimension.width,
+                                      height: cellDimension.height)
+                    #if os(macOS)
+                    background.color.setFill()
+                    rect.fill()
+                    #else
+                    context.setFillColor(background.color.cgColor)
+                    context.fill(rect)
+                    #endif
+                }
+                context.restoreGState()
             }
 
             if !underTextImages.isEmpty {
