@@ -723,6 +723,9 @@ final class Workspace {
         guard panes.count < Self.maximumPanes, let old = active, let parent = old.superview else { NSSound.beep(); return }
         // Replace a leaf with a nested split, preserving the existing PTY and scrollback.
         guard vertical ? old.bounds.width >= 420 : old.bounds.height >= 280 else { NSSound.beep(); return }
+        // AppKit may drop the responder while reparenting without calling its
+        // resignation hook. Clear focus while the old terminal is still attached.
+        old.window?.makeFirstResponder(nil)
         let split = TerminalSplitView(frame:old.frame); split.isVertical = vertical; split.dividerStyle = .thin
         if let parentSplit = parent as? NSSplitView {
             let frames = parentSplit.arrangedSubviews.map { ($0,$0.frame) }

@@ -1551,9 +1551,15 @@ enum SelfTest {
         defer { controller.stop();window.close();previous?.window?.makeKeyAndOrderFront(nil) }
         window.setContentSize(NSSize(width:1000,height:650));controller.content.layoutSubtreeIfNeeded()
         let workspace = controller.workspace
+        focusForKeyboardTest(controller)
+        let original = workspace.active!
+        window.makeFirstResponder(original.terminal)
+        let focusedBeforeSplit = original.terminal.hasFocus
         workspace.split(vertical:true,config:app.config);controller.content.layoutSubtreeIfNeeded()
         guard workspace.panes.count == 2 else { checks["paneClickFixture"] = false;return }
         let first = workspace.panes[0],second = workspace.panes[1]
+        checks["splitTransfersCursorFocusToNewPane"] = focusedBeforeSplit && !first.terminal.hasFocus && second.terminal.hasFocus && window.firstResponder === second.terminal
+        if checks["splitTransfersCursorFocusToNewPane"] == false { print("SPLIT_CURSOR_FOCUS",focusedBeforeSplit,first.terminal.hasFocus,second.terminal.hasFocus,window.firstResponder === second.terminal) }
         window.makeFirstResponder(first.terminal)
         func click(_ pane: Pane, gutter: Bool) -> Bool {
             let target: NSView = gutter ? pane:pane.terminal
