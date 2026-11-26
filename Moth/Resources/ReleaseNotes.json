@@ -15,7 +15,7 @@
       {
         "title": "Improved",
         "items": [
-          "Faster rendering of truecolour block animations, including Gloam, with bounded colour caches during long sessions.",
+          "Faster rendering of truecolor block animations, with bounded colour caches during long sessions.",
           "Finn Roach has been added to Thanks."
         ]
       }
