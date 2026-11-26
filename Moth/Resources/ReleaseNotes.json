@@ -8,7 +8,8 @@
         "title": "Fixed",
         "items": [
           "Mouse motion reporting now distinguishes hovering, dragging and button releases correctly, fixing unwanted selections in mouse-aware terminal programs. Thanks to Finn Roach for the fix.",
-          "Held letters repeat by default instead of invoking macOS press-and-hold accent selection."
+          "Held letters repeat by default instead of invoking macOS press-and-hold accent selection.",
+          "Clicking a split pane when returning from another application immediately focuses that pane, including clicks in its padding."
         ]
       },
       {

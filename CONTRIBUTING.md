@@ -24,3 +24,6 @@ drawing separately, not overall application frame rate. For a locally installed
 interactive animation, set `MOTH_TEST_ANIMATION_COMMAND` to an executable wrapper
 and run `./test-app.sh --gloam-only`; the probe runs it for ten seconds, sends `q`,
 and checks that the shell is restored. Use a silent local audio file for Gloam.
+`./test-app.sh --focus-only` checks AppKit's first-click gate, pane hit testing
+and keyboard delivery. Verify physical clicks after switching applications
+interactively; synthetic window events do not exercise the window server.

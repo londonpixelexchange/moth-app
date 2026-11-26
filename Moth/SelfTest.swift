@@ -15,6 +15,15 @@ import Metal
 enum SelfTest {
     static func run(app: App) {
         setbuf(stdout,nil)
+        if CommandLine.arguments.contains("--focus-only") {
+            DispatchQueue.main.asyncAfter(deadline:.now()+0.5) {
+                var checks: [String:Bool] = [:];activationClickChecks(app:app,into:&checks)
+                let output = ProcessInfo.processInfo.environment["MOTH_TEST_RESULT"]!
+                try! JSONSerialization.data(withJSONObject:checks,options:[.prettyPrinted,.sortedKeys]).write(to:URL(fileURLWithPath:output))
+                print(checks);app.windows.forEach { $0.stop() };exit(checks.values.allSatisfy { $0 } ? 0:1)
+            }
+            return
+        }
         if CommandLine.arguments.contains("--gloam-only") { LiveAnimationChecks(app).run();return }
         if CommandLine.arguments.contains("--animation-only") { AnimatedColourChecks.run(app);return }
         if CommandLine.arguments.contains("--keyboard-only") {
@@ -295,6 +304,7 @@ enum SelfTest {
                 }
                 resetShortcutChecks(app: app, into: &checks)
                 navigationChecks(app: app, into: &checks)
+                activationClickChecks(app:app,into:&checks)
                 paneClosingChecks(app:app,into:&checks)
                 splitGeometryChecks(into:&checks)
                 paneMaximizationChecks(into:&checks)
@@ -1532,6 +1542,42 @@ enum SelfTest {
             RunLoop.current.run(mode:.default,before:Date().addingTimeInterval(0.01))
             window.makeKeyAndOrderFront(nil)
         }
+    }
+
+    static func activationClickChecks(app: App, into checks: inout [String:Bool]) {
+        let previous = app.active, controller = TerminalWindowController(application:app)
+        app.windows.append(controller);controller.showWindow(nil)
+        guard let window = controller.window else { checks["paneClickFixture"] = false;return }
+        defer { controller.stop();window.close();previous?.window?.makeKeyAndOrderFront(nil) }
+        window.setContentSize(NSSize(width:1000,height:650));controller.content.layoutSubtreeIfNeeded()
+        let workspace = controller.workspace
+        workspace.split(vertical:true,config:app.config);controller.content.layoutSubtreeIfNeeded()
+        guard workspace.panes.count == 2 else { checks["paneClickFixture"] = false;return }
+        let first = workspace.panes[0],second = workspace.panes[1]
+        window.makeFirstResponder(first.terminal)
+        func click(_ pane: Pane, gutter: Bool) -> Bool {
+            let target: NSView = gutter ? pane:pane.terminal
+            let local = gutter ? NSPoint(x:2,y:pane.bounds.midY):NSPoint(x:30,y:pane.terminal.bounds.midY)
+            let point = target.convert(local,to:nil)
+            let down = NSEvent.mouseEvent(with:.leftMouseDown,location:point,modifierFlags:[],timestamp:ProcessInfo.processInfo.systemUptime,windowNumber:window.windowNumber,context:nil,eventNumber:1,clickCount:1,pressure:1)!
+            // Verify the gate AppKit uses for an activating click, then exercise
+            // actual window hit testing and first-responder routing. Physical
+            // cross-application activation still requires an interactive check.
+            let accepts = target.acceptsFirstMouse(for:down)
+            if accepts {
+                window.sendEvent(down)
+                let up = NSEvent.mouseEvent(with:.leftMouseUp,location:point,modifierFlags:[],timestamp:ProcessInfo.processInfo.systemUptime,windowNumber:window.windowNumber,context:nil,eventNumber:2,clickCount:1,pressure:0)!
+                window.sendEvent(up)
+            }
+            return accepts && window.firstResponder === pane.terminal && workspace.active === pane
+        }
+        checks["firstClickFocusesClickedTerminalPane"] = click(second,gutter:false)
+        checks["firstClickMovesFocusBackToOtherPane"] = click(first,gutter:false)
+        checks["firstClickInPanePaddingFocusesItsTerminal"] = click(second,gutter:true)
+        let recorder = MacroRecorder.shared;recorder.start(second.terminal)
+        let key = NSEvent.keyEvent(with:.keyDown,location:.zero,modifierFlags:[],timestamp:0,windowNumber:window.windowNumber,context:nil,characters:"x",charactersIgnoringModifiers:"x",isARepeat:false,keyCode:7)!
+        window.sendEvent(key)
+        checks["typingAfterPaneClickReachesClickedPane"] = recorder.finish().keys.joined() == "x"
     }
 
     static func paneClosingChecks(app: App, into checks: inout [String:Bool]) {

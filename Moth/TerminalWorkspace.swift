@@ -135,7 +135,10 @@ class ShellView: LocalProcessTerminalView {
         guard event.stage >= 2,!didForceLookup,lookup.forceClickAction != "off" else { return }
         didForceLookup = true; performLookupGesture(at:convert(event.locationInWindow,from:nil))
     }
+    // Deliver the activating click so it can choose a split pane immediately.
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
     override func mouseDown(with event: NSEvent) {
+        window?.makeFirstResponder(self)
         didForceLookup = false; commandManual = nil; commandManualDragged = false
         if lookup.commandClickManual,event.modifierFlags.intersection([.command,.control,.option,.shift]) == .command,link(at:event) == nil {
             let point = convert(event.locationInWindow,from:nil)
@@ -545,6 +548,9 @@ final class Pane: NSView, LocalProcessTerminalViewDelegate {
         apply(config)
     }
     @objc func closeThisPane(_ sender: Any?) { onClose?() }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+    override func mouseDown(with event: NSEvent) { window?.makeFirstResponder(terminal) }
+
     func showSplitControl(_ visible: Bool) { closeButton.isHidden = !visible; dragHandle.isHidden = !visible; terminalTop.constant = visible ? 24 : 10 }
     func setActive(_ active: Bool) { label.textColor = active ? terminal.caretColor : .secondaryLabelColor; label.stringValue = "\(active ? "●" : "○")  \(title)" }
     func sizeChanged(source: LocalProcessTerminalView, newCols: Int, newRows: Int) { dimensions.stringValue = "\(newCols) × \(newRows)"; if !terminal.replayingSession { changed?() } }
