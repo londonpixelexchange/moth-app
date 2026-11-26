@@ -639,6 +639,8 @@ final class AppearancePanel: NSWindowController, NSTextFieldDelegate, NSTableVie
         number("scrollback","Scrollback lines",range:0...100000,get:{Double($0.scrollback)},set:{$0.scrollback = Int($1.rounded())},in:page)
         check("alternateScreenScrollback","Keep local history from full-screen sessions such as mosh",\.alternateScreenScrollback,in:page)
         check("showLayoutsOnLaunch","Offer saved window layouts at launch (app-wide)",\.showLayoutsOnLaunch,in:page)
+        check("alwaysRepeatHeldKeys","Always repeat held keys in Moth",\.alwaysRepeatHeldKeys,in:page)
+        note("Leave off to follow your macOS accent-menu preference. Turn on to repeat held letters instead of showing accents in Moth.",in:page)
         check("optionAsMeta","Use Option as Meta",\.optionAsMeta,in:page)
         note("Leave off to type keyboard-layout characters such as # with Option+3 on a British keyboard. Enabling Meta sends terminal escape sequences instead.",in:page)
     }

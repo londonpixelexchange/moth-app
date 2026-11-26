@@ -863,13 +863,65 @@ enum SelfTest {
             }
             return recorder.finish().keys.joined() == String(repeating:expected,count:12)
         }
-        checks["terminalDefaultsToKeyRepeat"] = !UserDefaults.standard.bool(forKey:"ApplePressAndHoldEnabled")
+        checks["heldKeysFollowMacOSByDefault"] = !defaults.alwaysRepeatHeldKeys && terminal.pressAndHoldShowsAccentMenu && terminal.selectedRange().location != NSNotFound
+        terminal.feed(text:"abc")
+        checks["accentMenuUsesTerminalCaret"] = terminal.selectedRange() == NSRange(location:3,length:0)
+        do {
+            var repeatConfig = defaults; repeatConfig.alwaysRepeatHeldKeys = true
+            let decoded = try TOMLDecoder().decode(Configuration.self,from:Configuration.document(repeatConfig))
+            checks["heldKeyPreferenceRoundTrips"] = decoded.alwaysRepeatHeldKeys
+            let legacy = try TOMLDecoder().decode(Configuration.self,from:"optionAsMeta = false")
+            checks["legacyConfigFollowsMacOSHeldKeys"] = !legacy.alwaysRepeatHeldKeys
+            let profile = TerminalProfile(name:"Repeat",configuration:repeatConfig)
+            let restored = try JSONDecoder().decode(TerminalProfile.self,from:JSONEncoder().encode(profile))
+            checks["profileRetainsHeldKeyPreference"] = restored.applying(to:defaults).alwaysRepeatHeldKeys
+            pane.apply(repeatConfig)
+            checks["heldKeyOverrideAppliesToExistingPane"] = !terminal.pressAndHoldShowsAccentMenu && terminal.selectedRange().location != NSNotFound
+            pane.apply(defaults)
+            checks["heldKeyOverrideCanBeDisabled"] = terminal.pressAndHoldShowsAccentMenu && terminal.selectedRange().location != NSNotFound
+        } catch { checks["heldKeyPreferenceRoundTrips"] = false }
+        terminal.alwaysRepeatHeldKeys = true
         checks["heldLetterDeliversEveryRepeat"] = held("a",code:0,expected:"a")
+        for (letter,code): (String,UInt16) in [("j",38),("q",12),("x",7),("s",1)] {
+            checks["held_\(letter)_DeliversEveryRepeat"] = held(letter,code:code,expected:letter)
+        }
         checks["heldShiftLetterDeliversEveryRepeat"] = held("A",code:0,flags:.shift,expected:"A")
         checks["heldSpaceDeliversEveryRepeat"] = held(" ",code:49,expected:" ")
         checks["heldBackspaceDeliversEveryRepeat"] = held("\u{7f}",code:51,expected:"\u{7f}")
         checks["heldArrowDeliversEveryRepeat"] = held("\u{f703}",code:124,flags:[.function,.numericPad],expected:"\u{1b}[C")
         checks["heldControlKeyDeliversEveryRepeat"] = held("d",code:2,flags:.control,expected:"\u{4}")
+        func key(_ text: String, code: UInt16 = 0, repeatKey: Bool = false) -> NSEvent {
+            NSEvent.keyEvent(with:.keyDown,location:.zero,modifierFlags:[],timestamp:0,windowNumber:0,context:nil,
+                characters:text,charactersIgnoringModifiers:text,isARepeat:repeatKey,keyCode:code)!
+        }
+        // Simulate AppKit swallowing repeats. The override must still deliver
+        // every committed letter, and the default must leave AppKit in control.
+        for (letter,code): (String,UInt16) in [("a",0),("j",38),("q",12),("x",7),("s",1)] {
+            let capture = KeyboardRepeatCaptureView(frame:.zero)
+            capture.keyDown(with:key(letter,code:code))
+            capture.keyDown(with:key(letter,code:code,repeatKey:true))
+            checks["system_\(letter)_repeatStaysWithAppKit"] = capture.pressAndHoldShowsAccentMenu && capture.interpretedKeyDowns == 2 && capture.sent == Array(letter.utf8)
+            capture.alwaysRepeatHeldKeys = true
+            capture.keyDown(with:key(letter,code:code))
+            for _ in 0..<11 { capture.keyDown(with:key(letter,code:code,repeatKey:true)) }
+            checks["forced_\(letter)_repeatsBypassAppKit"] = capture.interpretedKeyDowns == 3 && capture.sent == Array(String(repeating:letter,count:13).utf8)
+            capture.alwaysRepeatHeldKeys = false
+            capture.keyDown(with:key(letter,code:code,repeatKey:true))
+            checks["system_\(letter)_restoresAppKitOnToggle"] = capture.interpretedKeyDowns == 4
+        }
+        let mismatch = KeyboardRepeatCaptureView(frame:.zero); mismatch.alwaysRepeatHeldKeys = true
+        mismatch.keyDown(with:key("a")); mismatch.keyDown(with:key("á",repeatKey:true))
+        checks["mismatchedRepeatTextStaysWithAppKit"] = mismatch.interpretedKeyDowns == 2
+        let composing = KeyboardRepeatCaptureView(frame:.zero); composing.alwaysRepeatHeldKeys = true
+        composing.keyDown(with:key("a"))
+        composing.setMarkedText("a",selectedRange:NSRange(location:1,length:0),replacementRange:NSRange(location:NSNotFound,length:0))
+        composing.keyDown(with:key("a",repeatKey:true))
+        checks["composingRepeatTextStaysWithAppKit"] = composing.interpretedKeyDowns == 2
+        composing.insertText("é",replacementRange:NSRange(location:NSNotFound,length:0)); composing.unmarkText()
+        checks["composingRepeatCommitsOnlyComposedText"] = composing.sent == Array("aé".utf8)
+        let noCommit = KeyboardRepeatCaptureView(frame:.zero); noCommit.alwaysRepeatHeldKeys = true; noCommit.commitsInitialText = false
+        noCommit.keyDown(with:key("a")); noCommit.keyDown(with:key("a",repeatKey:true))
+        checks["uncommittedRepeatStaysWithAppKit"] = noCommit.interpretedKeyDowns == 2 && noCommit.sent.isEmpty
         checks["nativeOptionTypingIsDefault"] = !defaults.optionAsMeta && !pane.terminal.optionAsMetaKey
         checks["britishOptionThreeSendsHash"] = input("#",raw:"3",meta:false) == "#"
         checks["nativeOptionTypingPreservesLayoutCharacters"] = input("€",raw:"2",meta:false) == "€"
@@ -2444,6 +2496,21 @@ final class DropCaptureView: ShellView {
     override func send(source: TerminalView, data: ArraySlice<UInt8>) { sent.append(contentsOf: data) }
 }
 
+/// A deterministic input-context stand-in: commit the initial key and consume
+/// its repeats, reproducing the interception the repeat override must bypass.
+final class KeyboardRepeatCaptureView: ShellView {
+    var sent: [UInt8] = []
+    var interpretedKeyDowns = 0
+    var commitsInitialText = true
+    override func send(source:TerminalView,data:ArraySlice<UInt8>) { sent.append(contentsOf:data) }
+    override func interpretKeyEvents(_ events:[NSEvent]) {
+        interpretedKeyDowns += events.count
+        for event in events where !event.isARepeat && commitsInitialText {
+            if let text = event.characters { insertText(text,replacementRange:NSRange(location:NSNotFound,length:0)) }
+        }
+    }
+}
+
 /// Real PTY tests for local directory inheritance, isolated from foreground UI timing.
 private final class DirectoryInheritanceChecks {
     let app: App
@@ -3666,8 +3733,12 @@ private final class LiveAnimationChecks {
 private enum HeldKeyPTYChecks {
     static func run(_ app: App, done: @escaping ([String:Bool])->Void) {
         guard let terminal = app.active?.workspace.active.terminal else { done(["heldKeysReachPTY":false]);return }
+        let previousRepeatSetting = terminal.alwaysRepeatHeldKeys
+        terminal.alwaysRepeatHeldKeys = true
+        let finish: ([String:Bool])->Void = { checks in terminal.alwaysRepeatHeldKeys = previousRepeatSetting; done(checks) }
         let cases: [(String,UInt16,NSEvent.ModifierFlags,String)] = [
-            ("a",0,[],"a"),("A",0,.shift,"A"),(" ",49,[]," "),
+            ("a",0,[],"a"),("j",38,[],"j"),("q",12,[],"q"),("x",7,[],"x"),("s",1,[],"s"),
+            ("A",0,.shift,"A"),(" ",49,[]," "),
             ("\u{7f}",51,[],"\u{7f}"),("\u{f703}",124,[.function,.numericPad],"\u{1b}[C"),("d",2,.control,"\u{4}")]
         let expected = cases.map { String(repeating:$0.3,count:12) }.joined()
         let hex = expected.utf8.map { String(format:"%02x",$0) }.joined()
@@ -3678,7 +3749,7 @@ private enum HeldKeyPTYChecks {
             DispatchQueue.main.asyncAfter(deadline:.now()+0.05) { wait(marker,remaining-1,completion) }
         }
         wait("MOTH_HELD_READY",120) { ready in
-            guard ready else { print("HELD_KEY_PTY_NOT_READY",terminal.getTerminal().exportPlainText());done(["heldKeysReachPTY":false]);return }
+            guard ready else { print("HELD_KEY_PTY_NOT_READY",terminal.getTerminal().exportPlainText());finish(["heldKeysReachPTY":false]);return }
             for (characters,code,flags,_) in cases {
                 for index in 0..<12 {
                     let event = NSEvent.keyEvent(with:.keyDown,location:.zero,modifierFlags:flags,timestamp:Double(index)/30,windowNumber:terminal.window!.windowNumber,context:nil,characters:characters,charactersIgnoringModifiers:characters,isARepeat:index > 0,keyCode:code)!
@@ -3688,7 +3759,7 @@ private enum HeldKeyPTYChecks {
             wait("MOTH_HELD_DONE",120) { complete in
                 let output = terminal.getTerminal().exportPlainText().components(separatedBy:.whitespacesAndNewlines).joined()
                 if !complete || !output.contains(hex) { print("HELD_KEY_PTY",complete,"expected",hex,"actual",output) }
-                done(["heldKeysReachPTY":complete && output.contains(hex)])
+                finish(["heldKeysReachPTY":complete && output.contains(hex)])
             }
         }
     }

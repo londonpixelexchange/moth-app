@@ -33,6 +33,18 @@ class ShellView: LocalProcessTerminalView {
     var recoveryHistoryTruncated = false
     var sessionEnded = false
     var readOnly = false
+    var alwaysRepeatHeldKeys: Bool {
+        get { !pressAndHoldShowsAccentMenu }
+        set { pressAndHoldShowsAccentMenu = !newValue }
+    }
+    override func selectedRange() -> NSRange {
+        // AppKit needs a valid insertion point to offer its press-and-hold menu.
+        // Forced repeats bypass the input context instead of hiding the caret.
+        let selection = super.selectedRange()
+        if selection.location != NSNotFound { return selection }
+        let terminal = getTerminal()
+        return NSRange(location:terminal.buffer.y * terminal.cols + terminal.buffer.x,length:0)
+    }
     var advanced = Configuration.Advanced()
     private var userInputDepth = 0
     private var encodingInputDepth = 0
@@ -184,6 +196,7 @@ class ShellView: LocalProcessTerminalView {
     }
     override init(frame: CGRect) {
         super.init(frame: frame)
+        pressAndHoldShowsAccentMenu = true
         getTerminal().allowsApplicationColumnModeChanges = false
         fontVariantResolver = FontTypography.styledFont
         wantsLayer = true
@@ -191,6 +204,7 @@ class ShellView: LocalProcessTerminalView {
     }
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+        pressAndHoldShowsAccentMenu = true
         getTerminal().allowsApplicationColumnModeChanges = false
         fontVariantResolver = FontTypography.styledFont
         wantsLayer = true
@@ -536,6 +550,7 @@ final class Pane: NSView, LocalProcessTerminalViewDelegate {
         terminal.configureCursor(shape: config.cursor.shape, animation: config.cursor.animation, period: config.cursor.period)
         terminal.getTerminal().setAlternateScreenScrollback(config.alternateScreenScrollback)
         terminal.optionAsMetaKey = config.optionAsMeta
+        terminal.alwaysRepeatHeldKeys = config.alwaysRepeatHeldKeys
         terminal.lookup = config.lookup; terminal.manualShortcut = config.keybindings["openManualPage"] ?? ""
         terminal.pressureConfiguration = NSPressureConfiguration(pressureBehavior:config.lookup.forceClickAction == "off" ? .primaryDefault : .primaryDeepClick)
         if appliedHistory != config.scrollback { terminal.getTerminal().changeHistorySize(config.scrollback); appliedHistory = config.scrollback }

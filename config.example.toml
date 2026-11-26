@@ -44,6 +44,8 @@ shell = '/bin/zsh'
 # false preserves macOS keyboard-layout characters such as Option+3 for #.
 # Enable only to send Option combinations as terminal Meta sequences.
 optionAsMeta = false
+# false follows the macOS accent-menu preference; true repeats held keys only in Moth.
+alwaysRepeatHeldKeys = false
 
 # lineHeight: cell height multiplier (1–2). characterSpacing: extra points per cell (0–6).
 # antialias: smooth text edges (true by default); false draws crisp pixel edges.

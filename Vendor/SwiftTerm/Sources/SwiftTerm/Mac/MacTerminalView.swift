@@ -178,6 +178,14 @@ open class TerminalView: NSView, NSTextInputClient, NSUserInterfaceValidations, 
     public var fontVariants: [String:NSFont] { ["regular":fontSet.normal,"bold":fontSet.bold,"italic":fontSet.italic,"boldItalic":fontSet.boldItalic] }
     var fontSet: FontSet
 
+    /// When true, repeated text keys are left to AppKit so its accent menu can appear.
+    /// By default, repeats bypass AppKit's input context and go to the terminal.
+    /// This cannot enable the menu when `ApplePressAndHoldEnabled` is false in defaults.
+    public var pressAndHoldShowsAccentMenu = false
+    private var repeatableTextKey: (keyCode: UInt16, text: String)?
+    private var keyDownCode: UInt16?
+    private var isComposing = false
+
     /// The font to use to render the terminal
     public var font: NSFont {
         get {
@@ -741,6 +749,11 @@ open class TerminalView: NSView, NSTextInputClient, NSUserInterfaceValidations, 
     // of those keys.
     //
     open override func keyDown(with event: NSEvent) {
+        if !event.isARepeat { repeatableTextKey = nil }
+        let previousKeyDownCode = keyDownCode
+        keyDownCode = event.keyCode
+        defer { keyDownCode = previousKeyDownCode }
+
         selection.active = false
         let eventFlags = event.modifierFlags
         
@@ -828,14 +841,32 @@ open class TerminalView: NSView, NSTextInputClient, NSUserInterfaceValidations, 
                     case NSPageDownFunctionKey:
                         pageDown()
                     default:
-                        interpretKeyEvents([event])
+                        if !repeatText(event) { interpretKeyEvents([event]) }
                     }
                 }
             }
             return
         }
-        
-        interpretKeyEvents([event])
+
+        if !repeatText(event) { interpretKeyEvents([event]) }
+    }
+
+    /// Re-send committed plain text without letting AppKit's input context consume a repeat.
+    private func repeatText(_ event: NSEvent) -> Bool {
+        guard event.isARepeat, !isComposing, !pressAndHoldShowsAccentMenu,
+              let key = repeatableTextKey,
+              key.keyCode == event.keyCode,
+              key.text == event.characters else {
+            return false
+        }
+        insertText(key.text, replacementRange: NSRange(location: NSNotFound, length: 0))
+        return true
+    }
+
+    private func isPlainPrintableText(_ text: String) -> Bool {
+        !text.isEmpty && text.unicodeScalars.allSatisfy {
+            $0.value >= 0x20 && !($0.value >= 0x7f && $0.value <= 0x9f)
+        }
     }
     
     public override func doCommand(by selector: Selector) {
@@ -896,6 +927,12 @@ open class TerminalView: NSView, NSTextInputClient, NSUserInterfaceValidations, 
     
     // NSTextInputClient protocol implementation
     open func insertText(_ string: Any, replacementRange: NSRange) {
+        let wasComposing = isComposing
+        isComposing = false
+        let text = (string as? String) ?? (string as? NSString).map { $0 as String }
+        if let keyDownCode, !wasComposing, let text, isPlainPrintableText(text) {
+            repeatableTextKey = (keyDownCode, text)
+        }
         insertText(string, replacementRange: replacementRange, isPaste: false)
     }
     
@@ -920,12 +957,13 @@ open class TerminalView: NSView, NSTextInputClient, NSUserInterfaceValidations, 
     
     // NSTextInputClient protocol implementation
     open func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
-        // nothing
+        isComposing = true
+        repeatableTextKey = nil
     }
     
     // NSTextInputClient protocol implementation
     open func unmarkText() {
-        // nothing
+        isComposing = false
     }
     
     // NSTextInputClient protocol implementation

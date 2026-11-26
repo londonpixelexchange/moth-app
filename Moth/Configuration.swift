@@ -370,6 +370,7 @@ struct Configuration: Codable {
     var enabledEncodings = TerminalTextEncoding.choices.map(\.id)
     var shell = "/bin/zsh"
     var optionAsMeta = false
+    var alwaysRepeatHeldKeys = false
     var window = Window()
     var background = Background()
     var cursor = Cursor()
@@ -406,6 +407,7 @@ struct Configuration: Codable {
         enabledEncodings = try c.decodeIfPresent([String].self,forKey:.enabledEncodings) ?? TerminalTextEncoding.choices.map(\.id)
         shell = try c.decodeIfPresent(String.self, forKey: .shell) ?? shell
         optionAsMeta = try c.decodeIfPresent(Bool.self, forKey: .optionAsMeta) ?? optionAsMeta
+        alwaysRepeatHeldKeys = try c.decodeIfPresent(Bool.self,forKey:.alwaysRepeatHeldKeys) ?? false
         window = try c.decodeIfPresent(Window.self, forKey: .window) ?? window
         background = try c.decodeIfPresent(Background.self, forKey: .background) ?? background
         cursor = try c.decodeIfPresent(Cursor.self, forKey: .cursor) ?? cursor
