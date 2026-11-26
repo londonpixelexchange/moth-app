@@ -41,8 +41,6 @@ enabledEncodings = [
     'EUC-KR'
 ]
 shell = '/bin/zsh'
-# false preserves macOS keyboard-layout characters such as Option+3 for #.
-# Enable only to send Option combinations as terminal Meta sequences.
 optionAsMeta = false
 
 # lineHeight: cell height multiplier (1–2). characterSpacing: extra points per cell (0–6).
@@ -124,7 +122,7 @@ type = 'solid'
 # style: border (pane edge), flash (soft pane wash), window-border (whole window edge).
 # intensity: 0–1; flash peaks at 18% of this value. thickness: border width in points (1–12).
 # sound: system name such as Glass, Ping, Pop, or an absolute audio path. volume: 0–1.
-# badge: count bells on the Dock icon; clears when Moth becomes active.
+# badge: count bells on the Dock icon while Moth is inactive; clears when Moth becomes active.
 # duration: visual highlight seconds (0.08–1). color: empty uses the theme accent, or six hex digits.
 [bell]
 badge = true
@@ -168,7 +166,7 @@ ignorePrograms = [ 'zsh', 'bash', 'fish', 'sh', 'dash', 'tcsh', 'csh', 'nu' ]
 
 # App-wide text actions. forceClickAction: off | definition | manual.
 # commandClickManual opens local manual pages for command names; URLs keep their normal action.
-# manualPresentation: popover | window. Manuals use this Mac's installed documentation.
+# manualPresentation: popover | window. openManualPage is configurable under keybindings.
 [lookup]
 commandClickManual = true
 forceClickAction = 'definition'
@@ -196,13 +194,12 @@ workingDirectory = ''
 
 [advanced.environment]
 
-# Command shortcuts. selectTab1–selectTab9 select the matching tab in the active window.
+# Command shortcuts. toggleMaximizePane maximises or restores the active split pane. selectTab1–selectTab9 select the matching tab in the active window.
 [keybindings]
 closePane = 'cmd+w'
 newTab = 'cmd+t'
 newWindow = 'cmd+n'
 nextPane = 'cmd+]'
-toggleMaximizePane = 'cmd+shift+return'
 nextTab = 'cmd+shift+]'
 openLayouts = 'cmd+shift+r'
 openManualPage = 'cmd+ctrl+m'
@@ -220,6 +217,7 @@ selectTab9 = 'cmd+9'
 splitDown = 'cmd+shift+d'
 splitRight = 'cmd+d'
 toggleKeyboardSounds = 'cmd+alt+k'
+toggleMaximizePane = 'cmd+shift+return'
 
 # Optional custom terminal palette; uncomment this section to enable.
 # [palette]

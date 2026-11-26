@@ -863,13 +863,34 @@ enum SelfTest {
             }
             return recorder.finish().keys.joined() == String(repeating:expected,count:12)
         }
-        checks["terminalDefaultsToKeyRepeat"] = !UserDefaults.standard.bool(forKey:"ApplePressAndHoldEnabled")
+        func key(_ characters:String,code:UInt16,isRepeat:Bool) -> NSEvent {
+            NSEvent.keyEvent(with:.keyDown,location:.zero,modifierFlags:[],timestamp:0,windowNumber:0,context:nil,characters:characters,charactersIgnoringModifiers:characters,isARepeat:isRepeat,keyCode:code)!
+        }
         checks["heldLetterDeliversEveryRepeat"] = held("a",code:0,expected:"a")
         checks["heldShiftLetterDeliversEveryRepeat"] = held("A",code:0,flags:.shift,expected:"A")
         checks["heldSpaceDeliversEveryRepeat"] = held(" ",code:49,expected:" ")
         checks["heldBackspaceDeliversEveryRepeat"] = held("\u{7f}",code:51,expected:"\u{7f}")
         checks["heldArrowDeliversEveryRepeat"] = held("\u{f703}",code:124,flags:[.function,.numericPad],expected:"\u{1b}[C")
         checks["heldControlKeyDeliversEveryRepeat"] = held("d",code:2,flags:.control,expected:"\u{4}")
+        let repeatCapture = KeyboardRepeatCaptureView(frame:.zero)
+        repeatCapture.keyDown(with:key("a",code:0,isRepeat:false))
+        repeatCapture.keyDown(with:key("a",code:0,isRepeat:true))
+        repeatCapture.keyDown(with:key("a",code:0,isRepeat:true))
+        checks["committedTextRepeatsBypassAppKit"] = repeatCapture.interpretedKeyDowns == 1 && repeatCapture.sent == Array("aaa".utf8)
+        let accentCapture = KeyboardRepeatCaptureView(frame:.zero)
+        accentCapture.pressAndHoldShowsAccentMenu = true
+        accentCapture.keyDown(with:key("a",code:0,isRepeat:false))
+        accentCapture.keyDown(with:key("a",code:0,isRepeat:true))
+        checks["accentMenuOptionLeavesRepeatsWithAppKit"] = accentCapture.interpretedKeyDowns == 2
+        let mismatchCapture = KeyboardRepeatCaptureView(frame:.zero)
+        mismatchCapture.keyDown(with:key("a",code:0,isRepeat:false))
+        mismatchCapture.keyDown(with:key("á",code:0,isRepeat:true))
+        checks["mismatchedRepeatTextStaysWithAppKit"] = mismatchCapture.interpretedKeyDowns == 2
+        let composingCapture = KeyboardRepeatCaptureView(frame:.zero)
+        composingCapture.keyDown(with:key("a",code:0,isRepeat:false))
+        composingCapture.setMarkedText("a",selectedRange:NSRange(location:1,length:0),replacementRange:NSRange(location:NSNotFound,length:0))
+        composingCapture.keyDown(with:key("a",code:0,isRepeat:true))
+        checks["composingRepeatTextStaysWithAppKit"] = composingCapture.interpretedKeyDowns == 2
         checks["nativeOptionTypingIsDefault"] = !defaults.optionAsMeta && !pane.terminal.optionAsMetaKey
         checks["britishOptionThreeSendsHash"] = input("#",raw:"3",meta:false) == "#"
         checks["nativeOptionTypingPreservesLayoutCharacters"] = input("€",raw:"2",meta:false) == "€"
@@ -2442,6 +2463,16 @@ enum SelfTest {
 final class DropCaptureView: ShellView {
     var sent: [UInt8] = []
     override func send(source: TerminalView, data: ArraySlice<UInt8>) { sent.append(contentsOf: data) }
+}
+
+final class KeyboardRepeatCaptureView: ShellView {
+    var sent: [UInt8] = []
+    var interpretedKeyDowns = 0
+    override func send(source:TerminalView,data:ArraySlice<UInt8>) { sent.append(contentsOf:data) }
+    override func interpretKeyEvents(_ eventArray:[NSEvent]) {
+        interpretedKeyDowns += eventArray.count
+        super.interpretKeyEvents(eventArray)
+    }
 }
 
 /// Real PTY tests for local directory inheritance, isolated from foreground UI timing.

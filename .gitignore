@@ -1,4 +1,5 @@
 Build/
+/test-artifacts/
 *.xcuserstate
 xcuserdata/
 .DS_Store

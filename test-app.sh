@@ -8,7 +8,7 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 MOTH_VALIDATION_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/moth-validation.XXXXXX")"
 trap 'rm -rf "$MOTH_VALIDATION_ROOT"' EXIT
 MOTH_VALIDATION_APP="$MOTH_VALIDATION_ROOT/Moth Validation.app"
-MOTH_VALIDATION_RESULT="${MOTH_TEST_RESULT:-$ROOT/TestResults.json}"
+MOTH_VALIDATION_RESULT="${MOTH_TEST_RESULT:-$ROOT/test-artifacts/TestResults.json}"
 ditto "${MOTH_TEST_APP:-$ROOT/Build/Moth.app}" "$MOTH_VALIDATION_APP"
 /usr/libexec/PlistBuddy -c "Set CFBundleIdentifier com.thom.moth.validation.$$" "$MOTH_VALIDATION_APP/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c 'Set CFBundleName Moth Validation' "$MOTH_VALIDATION_APP/Contents/Info.plist"
@@ -21,6 +21,7 @@ touch "$MOTH_VALIDATION_ROOT/started"
 /usr/bin/open -n -W "$MOTH_VALIDATION_APP" --stdout "$MOTH_VALIDATION_ROOT/stdout.log" --stderr "$MOTH_VALIDATION_ROOT/stderr.log" --env "MOTH_TEST_RESULT=$MOTH_LAUNCHED_RESULT" --env "MOTH_CONFIG_PATH=$MOTH_VALIDATION_ROOT/config.toml" --env "MOTH_TEST_ANIMATION_COMMAND=${MOTH_TEST_ANIMATION_COMMAND:-}" --args --self-test "$@"
 cat "$MOTH_VALIDATION_ROOT/stdout.log" "$MOTH_VALIDATION_ROOT/stderr.log"
 if [[ -s "$MOTH_LAUNCHED_RESULT" ]]; then
+  mkdir -p "$(dirname "$MOTH_VALIDATION_RESULT")"
   cp "$MOTH_VALIDATION_ROOT/results/"* "$(dirname "$MOTH_VALIDATION_RESULT")/"
   if [[ "$MOTH_VALIDATION_RESULT" != "$(dirname "$MOTH_VALIDATION_RESULT")/TestResults.json" ]]; then cp "$MOTH_LAUNCHED_RESULT" "$MOTH_VALIDATION_RESULT"; fi
 fi
