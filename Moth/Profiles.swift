@@ -25,6 +25,7 @@ struct TerminalProfile: Codable {
     var alternateScreenScrollback: Bool = true
     var shell: String = "/bin/zsh"
     var optionAsMeta: Bool = false
+    var alwaysRepeatHeldKeys = false
     var closeOnExit: Bool = true
     var textEncoding = "UTF-8"
     var loginShell: Bool = true
@@ -48,6 +49,7 @@ struct TerminalProfile: Codable {
         alternateScreenScrollback = configuration.alternateScreenScrollback
         shell = configuration.shell
         optionAsMeta = configuration.optionAsMeta
+        alwaysRepeatHeldKeys = configuration.alwaysRepeatHeldKeys
         closeOnExit = configuration.closeOnExit
         textEncoding = configuration.textEncoding
         loginShell = configuration.advanced.loginShell
@@ -77,6 +79,7 @@ struct TerminalProfile: Codable {
         alternateScreenScrollback = try c.decodeIfPresent(Bool.self,forKey:.alternateScreenScrollback) ?? alternateScreenScrollback
         shell = try c.decodeIfPresent(String.self,forKey:.shell) ?? shell
         optionAsMeta = try c.decodeIfPresent(Bool.self,forKey:.optionAsMeta) ?? optionAsMeta
+        alwaysRepeatHeldKeys = try c.decodeIfPresent(Bool.self,forKey:.alwaysRepeatHeldKeys) ?? false
         closeOnExit = try c.decodeIfPresent(Bool.self,forKey:.closeOnExit) ?? closeOnExit
         textEncoding = try c.decodeIfPresent(String.self,forKey:.textEncoding) ?? "UTF-8"
         loginShell = try c.decodeIfPresent(Bool.self,forKey:.loginShell) ?? loginShell
@@ -101,6 +104,7 @@ struct TerminalProfile: Codable {
         result.alternateScreenScrollback = alternateScreenScrollback
         result.shell = shell
         result.optionAsMeta = optionAsMeta
+        result.alwaysRepeatHeldKeys = alwaysRepeatHeldKeys
         result.closeOnExit = closeOnExit
         result.textEncoding = textEncoding
         result.advanced.loginShell = loginShell

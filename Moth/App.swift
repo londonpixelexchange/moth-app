@@ -71,9 +71,6 @@ final class App: NSObject, NSApplicationDelegate, NSMenuItemValidation {
         SessionRecovery.runHelperIfRequested()
         if CommandLine.arguments.contains("--recovery-test-host"),RecoveryHostFixture.root == nil { fputs("Recovery test requires its isolated temporary folder.\n",stderr); exit(2) }
         MothBenchmark.mainStarted = ProcessInfo.processInfo.systemUptime
-        // A terminal needs held letters to repeat instead of entering macOS's
-        // press-and-hold accent picker. Keep any explicit user override intact.
-        UserDefaults.standard.register(defaults:["ApplePressAndHoldEnabled":false])
         let app = NSApplication.shared, delegate = App()
         app.delegate = delegate; app.setActivationPolicy(.regular)
         withExtendedLifetime(delegate) { app.run() }
