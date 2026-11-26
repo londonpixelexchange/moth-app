@@ -1,5 +1,20 @@
 [
   {
+    "version": "0.28.2",
+    "build": 71,
+    "status": "released",
+    "sections": [
+      {
+        "title": "Fixed",
+        "items": [
+          "Held letters follow the macOS accent-menu preference by default. Enable Always repeat held keys in Settings → Shell to repeat letters in Moth without changing other apps. Co-authored with Finn Roach.",
+          "Block characters at both ends of the Unicode block-element range now use consistent cell geometry instead of falling back to font glyphs.",
+          "Inline bitmap images use display-scaled dimensions when fitting the terminal width, preventing oversized images on Retina displays."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.28.1",
     "build": 70,
     "status": "released",

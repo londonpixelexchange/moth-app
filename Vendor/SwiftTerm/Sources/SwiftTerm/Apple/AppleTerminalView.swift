@@ -672,7 +672,7 @@ extension TerminalView {
             // Renders block elements independently of the font
             // U+2580...U+259F
             } else if customBlockGlyphs,
-                      (ch.code > BlockElementMapping.lowerBoundary && ch.code < BlockElementMapping.upperBoundary),
+                      (ch.code >= BlockElementMapping.lowerBoundary && ch.code <= BlockElementMapping.upperBoundary),
                       let rects = BlockElementMapping.rects(for: UInt32(ch.code)) {
                 let fgColor = (currentAttributes[.foregroundColor] as? TTColor) ?? nativeForegroundColor
                 blockElements.append(BlockElementRenderItem(column: col, columnWidth: width, rects: rects, foregroundColor: fgColor))
@@ -1881,7 +1881,7 @@ extension TerminalView {
         if let context = terminal.kittyPlacementContext {
             insertImage (image, width: context.widthRequest, height: context.heightRequest, preserveAspectRatio: context.preserveAspectRatio)
         } else {
-            insertImage (image, width: CGFloat (width) > frame.width ? .percent(100) : .auto, height: .auto, preserveAspectRatio: true)
+            insertImage (image, width: CGFloat (width) / getImageScale() > frame.width ? .percent(100) : .auto, height: .auto, preserveAspectRatio: true)
         }
     }
    
