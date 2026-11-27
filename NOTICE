@@ -1,1 +1,16 @@
-Moth. Copyright (c) 2026 T E Vaughan. Licensed under the Moth Source-Available Licence 1.0 (see LICENSE). Third-party components: see THIRD-PARTY-NOTICES.
+Moth. Copyright (C) 2026 T E Vaughan and Moth contributors.
+
+Moth's own source code, build scripts and documentation are licensed under
+GNU GPL version 3 or, at your option, any later version.
+SPDX-License-Identifier: GPL-3.0-or-later
+See LICENSE for the full licence text. Moth comes without any warranty.
+
+Third-party code and assets retain their own licences: see THIRD-PARTY-NOTICES.
+Wumpus Mono Pro font files are proprietary and separately licensed: see
+FONT-PERMISSION and Moth/Resources/Fonts/Wumpus-Licence.txt. The app loads
+these separate resource files at runtime; they are not compiled into its code.
+The Moth name, icon and logo are subject to TRADEMARKS.
+
+Releases made before the GPL transition retain their original terms. The
+former Moth Source-Available Licence 1.0 and font permission are preserved
+in licences/. These historical grants are not revoked by this change.

@@ -1,6 +1,6 @@
 // Copyright (c) 2026 T E Vaughan.
-// SPDX-License-Identifier: LicenseRef-Moth-SAL-1.0
-// Source-available under the Moth Source-Available Licence 1.0. See LICENSE.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Licensed under GNU GPL version 3 or later. See LICENSE.
 
 import AppKit
 
@@ -119,7 +119,7 @@ final class AboutWindowController: NSWindowController {
             window.appearance = NSAppearance(named:.darkAqua); window.title = "Licences"; window.isReleasedWhenClosed = false; window.center()
             let scroll = NSScrollView(); scroll.hasVerticalScroller = true; window.contentView = scroll
             let text = NSTextView(frame:NSRect(x:0,y:0,width:650,height:470)); text.isEditable = false; text.isRichText = false; text.font = .monospacedSystemFont(ofSize:11,weight:.regular); text.isVerticallyResizable = true; text.isHorizontallyResizable = false; text.autoresizingMask = [.width]; text.textContainer?.widthTracksTextView = true; text.textContainerInset = NSSize(width:16,height:16)
-            let documents = ["LICENSE", "NOTICE", "THIRD-PARTY-NOTICES", "FONT-PERMISSION", "TRADEMARKS"]
+            let documents = ["NOTICE", "LICENSE", "THIRD-PARTY-NOTICES", "FONT-PERMISSION", "TRADEMARKS"]
             text.string = documents.map { name in
                 guard let url = Bundle.main.url(forResource: name, withExtension: nil),
                       let contents = try? String(contentsOf: url, encoding: .utf8) else {

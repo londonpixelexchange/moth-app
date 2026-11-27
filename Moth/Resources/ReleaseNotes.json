@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.28.3",
+    "build": 72,
+    "status": "released",
+    "sections": [
+      {
+        "title": "Changed",
+        "items": [
+          "Moth’s own code, build scripts and documentation are now free and open source under GNU GPL version 3 or later (GPL-3.0-or-later). The official app remains free.",
+          "Contributions now require a Developer Certificate of Origin (DCO) sign-off.",
+          "Third-party components retain their existing licences. Wumpus Mono Pro remains proprietary under separate terms, and modified forks must use a different name, icon and logo.",
+          "Earlier releases retain the Moth Source-Available Licence 1.0 and their original font permission. The new terms do not revoke those earlier grants."
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.28.2",
     "build": 71,
     "status": "released",

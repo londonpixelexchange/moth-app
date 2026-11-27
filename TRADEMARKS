@@ -1,19 +1,27 @@
-Moth name and icon policy
+Moth name, icon and logo policy
 
-1.  "Moth", the Moth icon and the Moth logo are trade marks of T E Vaughan, whether registered or not.
+1.  "Moth", the Moth icon and the Moth logo are trade marks of T E Vaughan,
+    whether registered or not. The GPL does not grant trade mark rights.
 
-2.  You may redistribute unmodified official source and builds of Moth free of charge
-    under the Moth name and icon.
+2.  You may use the Moth name, icon and logo when redistributing unmodified
+    official source or builds, provided you clearly identify the source
+    and do not imply that your distribution is an official service.
 
-3.  A modified Fork must use a different name and a different icon. It may say
-    truthfully that it is "based on Moth" or "a fork of Moth", but not in a
-    way that suggests it is official or endorsed.
+3.  A modified fork must use a different product name, icon and logo.
+    A fork is a work derived from Moth's code. It may state truthfully
+    that it is "based on Moth" or "a fork of Moth", and retain required
+    copyright and attribution notices. Its branding, download pages and
+    listings must not suggest that it is official or endorsed by Moth
+    or T E Vaughan.
 
-4.  You must not use the Moth name or icon to promote anything you charge
-    for, except for plain factual statements such as "works with Moth".
+4.  Plain factual references such as "works with Moth" are permitted if
+    they do not imply endorsement. Do not use the Moth icon or logo as
+    the branding for another product or service.
 
-5.  "Fork" has the meaning given in the Moth Source-Available Licence. This
-    policy is separate from that licence and from the Wumpus Mono Pro
-    redistribution permission.
+5.  This policy is separate from the GNU General Public License and the
+    Wumpus Mono Pro font permission. It does not restrict the rights to
+    use, modify or distribute code under the GPL, including commercially.
+    The icon and logo artwork is reserved for use under this policy;
+    it is not relicensed as GPL code or documentation.
 
 6.  To ask about any other use, email support@getmoth.dev.
