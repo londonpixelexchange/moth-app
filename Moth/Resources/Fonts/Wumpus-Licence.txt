@@ -1,4 +1,18 @@
-Wumpus Mono Pro
+Wumpus Mono Pro: permission for the font files supplied with Moth
 
-See FONT-PERMISSION for the redistribution and modification terms that
-apply to the font files supplied with Moth.
+Copyright (c) T E Vaughan. All rights reserved.
+
+The font files supplied with Moth are not covered by the GNU General
+Public Licence that applies to Moth's code. They are licensed separately
+on these terms.
+
+You may use the font files only within Moth or a Fork of Moth distributed
+under the GNU GPL, and you may redistribute them, unmodified, only as part
+of such a distribution. A Fork means a work derived from Moth's code.
+
+You may not modify, extract, install separately, sublicense or sell the
+font files, or use them in any other software, document or product.
+
+Licences for other uses are available from vaughantype.com.
+
+THE FONT FILES ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.

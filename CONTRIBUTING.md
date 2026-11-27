@@ -1,6 +1,15 @@
 # Contributing
 
-By submitting a contribution you agree to section 8 of [LICENSE](LICENSE).
+Contributions to Moth’s own code and documentation are licensed under
+`GPL-3.0-or-later`; see [LICENSE](LICENSE). Vendored components retain their
+own licences, and changes to them must follow those licences.
+
+Every contribution commit needs a Developer Certificate of Origin (DCO)
+sign-off. Read [DCO 1.1](https://developercertificate.org/), then use
+`git commit -s` to add `Signed-off-by: Your Name <your-email@example.com>`.
+Only sign off work you have the right to contribute. No CLA is required.
+The DCO sign-off is separate from the cryptographic commit signature
+required below. Preserve contributor sign-offs when squashing commits.
 
 Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages and pull request titles.
 

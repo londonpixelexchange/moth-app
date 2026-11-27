@@ -1,5 +1,5 @@
 # Copyright (c) 2026 T E Vaughan.
-# SPDX-License-Identifier: LicenseRef-Moth-SAL-1.0
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 from pathlib import Path
 

@@ -19,6 +19,8 @@ brew install --cask londonpixelexchange/tap/moth
 
 ## Licence
 
-Moth is free and source-available under the [Moth Source-Available Licence 1.0](LICENSE). Anyone may use it for any purpose, change it and share free copies or forks. Charging for Moth or a fork needs permission (support@getmoth.dev).
+Moth’s code and documentation are free and open source under the [GNU General Public License, version 3 or later](LICENSE) (`GPL-3.0-or-later`). You may use, modify and redistribute the code, including commercially, under the GPL’s terms. Distributed modified versions must also provide corresponding source under those terms.
 
-See [third-party notices](THIRD-PARTY-NOTICES), the [Wumpus Mono Pro permission](FONT-PERMISSION) and the [Moth name and icon policy](TRADEMARKS).
+Third-party components retain their own licences. The bundled Wumpus Mono Pro font files are proprietary and have [separate terms](FONT-PERMISSION). Modified forks must use a different name, icon and logo under the [Moth branding policy](TRADEMARKS).
+
+See [NOTICE](NOTICE) and [third-party notices](THIRD-PARTY-NOTICES). Earlier releases retain the [Moth Source-Available Licence 1.0](licences/moth-source-available-1.0.txt) and their original [font permission](licences/wumpus-font-permission-1.0.txt).

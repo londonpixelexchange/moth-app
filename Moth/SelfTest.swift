@@ -1,6 +1,6 @@
 // Copyright (c) 2026 T E Vaughan.
-// SPDX-License-Identifier: LicenseRef-Moth-SAL-1.0
-// Source-available under the Moth Source-Available Licence 1.0. See LICENSE.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Licensed under GNU GPL version 3 or later. See LICENSE.
 
 import AppKit
 import AVFoundation
@@ -1083,7 +1083,7 @@ enum SelfTest {
         checks["wumpusIsDefaultFont"] = Configuration().fontName == "WumpusMonoPro-Regular"
         let notices = Bundle.main.url(forResource:"THIRD-PARTY-NOTICES",withExtension:nil).flatMap { try? String(contentsOf:$0) } ?? ""
         let fontPermission = Bundle.main.url(forResource:"FONT-PERMISSION",withExtension:nil).flatMap { try? String(contentsOf:$0) } ?? ""
-        checks["fontEmbeddingLicenceAndIBMLicenceBundled"] = fontPermission.contains("worldwide, non-exclusive, royalty-free permission") && notices.contains("IBM Plex Mono 2.5.0") && notices.contains("SIL OPEN FONT LICENSE")
+        checks["fontEmbeddingLicenceAndIBMLicenceBundled"] = fontPermission.contains("not covered by the GNU General") && fontPermission.contains("redistribute them, unmodified, only as part") && notices.contains("IBM Plex Mono 2.5.0") && notices.contains("SIL OPEN FONT LICENSE")
         var hash: UInt64 = 14695981039346656037
         for x in KeyboardSoundPlayer.samples(style:"tink",midi:60) { for shift in stride(from:0,to:32,by:8) { hash = (hash ^ UInt64((x.bitPattern >> shift)&255)) &* 1099511628211 } }
         checks["tinkWaveformRemainsUnchanged"] = hash == 0x16acb3c7afaaa9fc

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Copyright (c) 2026 T E Vaughan.
-# SPDX-License-Identifier: LicenseRef-Moth-SAL-1.0
-# Source-available under the Moth Source-Available Licence 1.0. See LICENSE.
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Licensed under GNU GPL version 3 or later. See LICENSE.
 
 """Repeatable, isolated Moth Release benchmark; only benchmark-owned processes are stopped."""
 import argparse, csv, datetime, hashlib, json, math, os, pathlib, platform, plistlib, shutil, signal, subprocess, tempfile, time

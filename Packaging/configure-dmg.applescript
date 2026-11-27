@@ -1,3 +1,6 @@
+-- Copyright (C) 2026 T E Vaughan and Moth contributors.
+-- SPDX-License-Identifier: GPL-3.0-or-later
+
 on run argv
  set mountPath to item 1 of argv
  tell application "Finder"
